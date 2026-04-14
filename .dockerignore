@@ -1,0 +1,15 @@
+node_modules
+dist
+.git
+database.sqlite*
+backups
+scripts
+src/tests
+.env
+Dockerfile
+fly.toml
+README.md
+RUNBOOK.md
+implementation_plan.md
+task.md
+walkthrough.md
