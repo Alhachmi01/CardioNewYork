@@ -1,0 +1,25 @@
+{
+  "name": "cardionewyork",
+  "version": "1.0.0",
+  "description": "CardioNewYork",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alhachmi01/CardioNewYork.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Alhachmi01/CardioNewYork/issues"
+  },
+  "homepage": "https://github.com/Alhachmi01/CardioNewYork#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
