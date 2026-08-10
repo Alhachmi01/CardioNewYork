@@ -11,7 +11,10 @@ export function SiteFooter() {
     return (
       <footer className="site-footer landing-footer">
         <div className="shell landing-footer-inner">
-          <span>© {new Date().getFullYear()} GuideVexa.</span>
+          <div className="landing-footer-copy">
+            <span>© {new Date().getFullYear()} GuideVexa.</span>
+            <p>GuideVexa is an independent planning tool and is not affiliated with any airline, hotel or booking platform.</p>
+          </div>
           <nav aria-label="Landing page legal links">
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
