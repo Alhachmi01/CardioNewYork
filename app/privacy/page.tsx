@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Privacy Policy" };
+const description = "GuideVexa privacy policy and information about tool inputs, analytics and third-party services.";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description,
+  alternates: { canonical: "/privacy" },
+  openGraph: { title: "GuideVexa Privacy Policy", description, url: "/privacy", type: "website" },
+};
 
 export default function PrivacyPage() {
   return (
