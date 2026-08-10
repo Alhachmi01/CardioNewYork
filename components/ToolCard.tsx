@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowIcon } from "@/components/ArrowIcon";
 import type { ToolDefinition } from "@/lib/site";
 
 export function ToolCard({ tool }: { tool: ToolDefinition }) {
@@ -10,7 +11,7 @@ export function ToolCard({ tool }: { tool: ToolDefinition }) {
       </div>
       <h3>{tool.name}</h3>
       <p>{tool.description}</p>
-      <span className="tool-card-action"><span>Open tool</span><span aria-hidden="true">→</span></span>
+      <span className="tool-card-action"><span>Open tool</span><ArrowIcon className="inline-arrow" /></span>
     </Link>
   );
 }
