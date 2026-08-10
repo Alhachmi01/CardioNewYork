@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import type { Metadata } from "next";
 import { TravelPackLanding } from "@/components/TravelPackLanding";
 import { parseTravelBudgetSearchParams, type TravelBudgetSearchParams } from "@/lib/travelBudget";
@@ -27,5 +26,5 @@ type SearchParams = Promise<TravelBudgetSearchParams>;
 
 export default async function TravelPackPage({ searchParams }: { searchParams: SearchParams }) {
   const input = parseTravelBudgetSearchParams(await searchParams);
-  return <TravelPackLanding {...input} ogAdsSessionId={randomUUID()} />;
+  return <TravelPackLanding {...input} />;
 }
