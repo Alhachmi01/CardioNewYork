@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Terms of Use" };
+const description = "GuideVexa terms of use for tools, estimates, downloadable resources and third-party offers.";
+
+export const metadata: Metadata = {
+  title: "Terms of Use",
+  description,
+  alternates: { canonical: "/terms" },
+  openGraph: { title: "GuideVexa Terms of Use", description, url: "/terms", type: "website" },
+};
 
 export default function TermsPage() {
   return (
