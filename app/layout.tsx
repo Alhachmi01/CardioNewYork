@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { ReactNode } from "react";
 import "./globals.css";
 import "./polish.css";
@@ -31,6 +33,8 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         <SiteHeader />
         <main>{children}</main>
         <SiteFooter />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
