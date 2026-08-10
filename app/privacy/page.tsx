@@ -20,22 +20,22 @@ export default function PrivacyPage() {
       <div className="prose-block">
         <h2>Data you enter into tools</h2>
         <p>
-          GuideVexa V1 performs its current calculator and checklist interactions in your browser. We do not intentionally send or store the values you enter into these tools on a GuideVexa database.
+          GuideVexa V1 performs its current calculator and checklist interactions in your browser. We do not intentionally send or store the values you enter into these tools on a GuideVexa database. Travel-pack details are temporarily kept in your browser session when needed to restore a personalized download after an unlock flow.
         </p>
 
-        <h2>Analytics and advertising measurement</h2>
+        <h2>Analytics and performance measurement</h2>
         <p>
-          GuideVexa does not currently activate advertising pixels or behavioural analytics through this V1 release. If analytics, advertising measurement or similar technologies are enabled later, this policy will be updated to describe the services used and the information they process.
+          GuideVexa includes Vercel Web Analytics and Speed Insights components to understand site usage and technical performance. These services may process ordinary request, device and performance information according to Vercel&apos;s own terms and privacy practices. GuideVexa&apos;s custom funnel events are designed not to include planner fields such as your destination.
         </p>
 
         <h2>Third-party offers and unlock services</h2>
         <p>
-          Some future downloadable resources may clearly offer an optional third-party completion step before access. When such a feature is active, the third-party provider may process information under its own privacy policy. GuideVexa will identify that interaction on the relevant page rather than presenting it as a first-party action.
+          The Complete Travel Pack can use an OGAds content locker that requires one available third-party offer completion before the download is unlocked. The locker may be delivered through an OGAds-managed or shared domain. When you open the locker, choose an offer or submit information to an offer provider, OGAds and the relevant independent provider may process information under their own terms and privacy policies. GuideVexa does not present those third-party forms as GuideVexa forms.
         </p>
 
         <h2>Technical information</h2>
         <p>
-          Our hosting and network providers may process ordinary technical request data needed to deliver and protect the website, such as IP address, browser information, timestamps and requested URLs, according to their own service terms and privacy practices.
+          Our hosting, analytics, network and unlock-service providers may process ordinary technical request data needed to deliver, measure and protect the website, such as IP address, browser information, timestamps and requested URLs, according to their own service terms and privacy practices.
         </p>
 
         <h2>Contact</h2>
