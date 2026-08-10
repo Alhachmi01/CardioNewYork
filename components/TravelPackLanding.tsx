@@ -47,19 +47,18 @@ function waitForOgAdsLoader() {
   });
 }
 
-type TravelPackLandingProps = TravelBudgetInput & {
-  ogAdsSessionId: string;
-};
-
-export function TravelPackLanding({ ogAdsSessionId, ...input }: TravelPackLandingProps) {
+export function TravelPackLanding(input: TravelBudgetInput) {
   const safeInput = normalizeTravelBudgetInput(input);
   const totals = calculateTravelBudget(safeInput);
   const { days, people, currency } = safeInput;
   const hasTrackedView = useRef(false);
+  const [ogAdsSessionId, setOgAdsSessionId] = useState<string | null>(null);
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [unlockError, setUnlockError] = useState<string | null>(null);
-  const ogAdsScriptUrl = `${ogAdsScriptBaseUrl}?aff_sub=${encodeURIComponent(ogAdsSessionId)}`;
-  const ogAdsDirectUrl = `${ogAdsDirectBaseUrl}?aff_sub=${encodeURIComponent(ogAdsSessionId)}`;
+
+  useEffect(() => {
+    setOgAdsSessionId(current => current ?? window.crypto.randomUUID());
+  }, []);
 
   useEffect(() => {
     if (hasTrackedView.current) return;
@@ -73,7 +72,7 @@ export function TravelPackLanding({ ogAdsSessionId, ...input }: TravelPackLandin
   }, [currency, days, people, totals.total]);
 
   const requestDownload = async () => {
-    if (isUnlocking) return;
+    if (isUnlocking || !ogAdsSessionId) return;
     setIsUnlocking(true);
     setUnlockError(null);
 
@@ -117,15 +116,19 @@ export function TravelPackLanding({ ogAdsSessionId, ...input }: TravelPackLandin
     }
 
     trackEvent("locker_open", { method: "direct_fallback" });
-    window.location.assign(ogAdsDirectUrl);
+    const directUrl = `${ogAdsDirectBaseUrl}?aff_sub=${encodeURIComponent(ogAdsSessionId)}`;
+    window.location.assign(directUrl);
   };
 
   const plannerHref = `/tools/travel-budget-planner?${buildTravelBudgetQuery(safeInput)}`;
-  const ctaLabel = isUnlocking ? "Preparing unlock…" : "Unlock & download my travel pack";
+  const ctaLabel = !ogAdsSessionId ? "Preparing secure unlock…" : isUnlocking ? "Preparing unlock…" : "Unlock & download my travel pack";
+  const ogAdsScriptUrl = ogAdsSessionId
+    ? `${ogAdsScriptBaseUrl}?aff_sub=${encodeURIComponent(ogAdsSessionId)}`
+    : null;
 
   return (
     <div className="landing-page">
-      <Script id="ogjs" src={ogAdsScriptUrl} strategy="afterInteractive" />
+      {ogAdsScriptUrl ? <Script id="ogjs" src={ogAdsScriptUrl} strategy="afterInteractive" /> : null}
 
       <section className="landing-hero shell">
         <div className="landing-hero-copy">
@@ -145,8 +148,8 @@ export function TravelPackLanding({ ogAdsSessionId, ...input }: TravelPackLandin
             className="button landing-primary-cta"
             data-ogads-slot="travel-pack"
             onClick={requestDownload}
-            disabled={isUnlocking}
-            aria-busy={isUnlocking}
+            disabled={isUnlocking || !ogAdsSessionId}
+            aria-busy={isUnlocking || !ogAdsSessionId}
           >
             {ctaLabel}
           </button>
@@ -210,8 +213,8 @@ export function TravelPackLanding({ ogAdsSessionId, ...input }: TravelPackLandin
           className="button landing-primary-cta"
           data-ogads-slot="travel-pack"
           onClick={requestDownload}
-          disabled={isUnlocking}
-          aria-busy={isUnlocking}
+          disabled={isUnlocking || !ogAdsSessionId}
+          aria-busy={isUnlocking || !ogAdsSessionId}
         >
           {ctaLabel}
         </button>
