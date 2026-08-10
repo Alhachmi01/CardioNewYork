@@ -1,8 +1,29 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { isValidOgAdsSessionId, verifyOgAdsSession } from "@/lib/ogadsStore";
 
+function matchesConfiguredPostbackSecret(url: URL) {
+  const expected = process.env.OGADS_POSTBACK_SECRET?.trim();
+  if (!expected) return true;
+
+  const supplied = url.searchParams.get("pb_secret");
+  if (!supplied) return false;
+
+  const expectedBytes = Buffer.from(expected);
+  const suppliedBytes = Buffer.from(supplied);
+  return expectedBytes.length === suppliedBytes.length && timingSafeEqual(expectedBytes, suppliedBytes);
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
+
+  if (!matchesConfiguredPostbackSecret(url)) {
+    return new NextResponse("UNAUTHORIZED", {
+      status: 401,
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
+
   const sessionId = url.searchParams.get("aff_sub");
 
   if (!isValidOgAdsSessionId(sessionId)) {
