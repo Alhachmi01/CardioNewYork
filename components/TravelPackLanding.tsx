@@ -1,30 +1,15 @@
 "use client";
 
 import Link from "next/link";
-
-type TravelPackInput = {
-  destination: string;
-  currency: "USD" | "EUR" | "GBP" | "MAD" | "CAD" | "AUD";
-  days: number;
-  people: number;
-  rooms: number;
-  nightly: number;
-  flightsPerPerson: number;
-  foodPerPerson: number;
-  activitiesPerPerson: number;
-  localTransportPerDay: number;
-  insurancePerPerson: number;
-  misc: number;
-  bufferPct: number;
-};
-
-function formatMoney(value: number, currency: TravelPackInput["currency"]) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: 0,
-  }).format(Number.isFinite(value) ? value : 0);
-}
+import { useEffect, useRef } from "react";
+import { trackEvent } from "@/lib/analytics";
+import {
+  buildTravelBudgetQuery,
+  calculateTravelBudget,
+  formatMoney,
+  normalizeTravelBudgetInput,
+  type TravelBudgetInput,
+} from "@/lib/travelBudget";
 
 function escapeHtml(value: string) {
   return value.replace(/[&<>'"]/g, character => ({
@@ -36,47 +21,32 @@ function escapeHtml(value: string) {
   })[character] ?? character);
 }
 
-export function TravelPackLanding(input: TravelPackInput) {
-  const days = Math.max(input.days, 1);
-  const people = Math.max(input.people, 1);
-  const rooms = Math.max(input.rooms, 1);
-  const nights = Math.max(days - 1, 0);
+export function TravelPackLanding(input: TravelBudgetInput) {
+  const safeInput = normalizeTravelBudgetInput(input);
+  const totals = calculateTravelBudget(safeInput);
+  const { days, people, currency } = safeInput;
+  const hasTrackedView = useRef(false);
 
-  const flights = input.flightsPerPerson * people;
-  const lodging = input.nightly * nights * rooms;
-  const food = input.foodPerPerson * days * people;
-  const activities = input.activitiesPerPerson * days * people;
-  const localTransport = input.localTransportPerDay * days;
-  const insurance = input.insurancePerPerson * people;
-  const subtotal = flights + lodging + food + activities + localTransport + insurance + input.misc;
-  const buffer = subtotal * (Math.max(input.bufferPct, 0) / 100);
-  const total = subtotal + buffer;
-  const perPerson = total / people;
-  const perDay = total / days;
-
-  const downloadPack = () => {
-    window.dispatchEvent(new CustomEvent("guidevexa:tool-event", {
-      detail: {
-        name: "travel_pack_lp_download",
-        currency: input.currency,
-        days,
-        travelers: people,
-        estimated_total: Math.round(total),
-      },
-    }));
-
-    const analyticsWindow = window as Window & {
-      dataLayer?: Array<Record<string, string | number>>;
-    };
-    analyticsWindow.dataLayer?.push({
-      event: "travel_pack_lp_download",
-      currency: input.currency,
+  useEffect(() => {
+    if (hasTrackedView.current) return;
+    hasTrackedView.current = true;
+    trackEvent("travel_pack_lp_view", {
+      currency,
       days,
       travelers: people,
-      estimated_total: Math.round(total),
+      estimated_total: Math.round(totals.total),
+    });
+  }, [currency, days, people, totals.total]);
+
+  const startDownload = () => {
+    trackEvent("download_start", {
+      currency,
+      days,
+      travelers: people,
+      estimated_total: Math.round(totals.total),
     });
 
-    const destination = escapeHtml(input.destination || "Your trip");
+    const destination = escapeHtml(safeInput.destination || "Your trip");
     const plannerRows = Array.from({ length: Math.min(days, 60) }, (_, index) => (
       `<tr><td>Day ${index + 1}</td><td></td><td></td><td></td></tr>`
     )).join("");
@@ -93,22 +63,22 @@ body{font-family:Arial,sans-serif;max-width:860px;margin:40px auto;padding:0 22p
 </head>
 <body>
 <h1>GuideVexa Complete Travel Pack</h1>
-<p class="meta">${destination} · ${days} days · ${people} traveler${people === 1 ? "" : "s"} · ${input.currency}</p>
+<p class="meta">${destination} · ${days} days · ${people} traveler${people === 1 ? "" : "s"} · ${currency}</p>
 <div class="grid">
-<div class="card"><small>Estimated total</small><strong>${formatMoney(total, input.currency)}</strong></div>
-<div class="card"><small>Per traveler</small><strong>${formatMoney(perPerson, input.currency)}</strong></div>
-<div class="card"><small>Per day</small><strong>${formatMoney(perDay, input.currency)}</strong></div>
+<div class="card"><small>Estimated total</small><strong>${formatMoney(totals.total, currency)}</strong></div>
+<div class="card"><small>Per traveler</small><strong>${formatMoney(totals.perPerson, currency)}</strong></div>
+<div class="card"><small>Per day</small><strong>${formatMoney(totals.perDay, currency)}</strong></div>
 </div>
 <h2>Budget breakdown</h2>
 <table class="rows"><tbody>
-<tr><td>Flights</td><td>${formatMoney(flights, input.currency)}</td></tr>
-<tr><td>Lodging</td><td>${formatMoney(lodging, input.currency)}</td></tr>
-<tr><td>Food</td><td>${formatMoney(food, input.currency)}</td></tr>
-<tr><td>Activities</td><td>${formatMoney(activities, input.currency)}</td></tr>
-<tr><td>Local transport</td><td>${formatMoney(localTransport, input.currency)}</td></tr>
-<tr><td>Travel insurance</td><td>${formatMoney(insurance, input.currency)}</td></tr>
-<tr><td>Other / miscellaneous</td><td>${formatMoney(input.misc, input.currency)}</td></tr>
-<tr><td>${input.bufferPct}% safety buffer</td><td>${formatMoney(buffer, input.currency)}</td></tr>
+<tr><td>Flights</td><td>${formatMoney(totals.flights, currency)}</td></tr>
+<tr><td>Lodging</td><td>${formatMoney(totals.lodging, currency)}</td></tr>
+<tr><td>Food</td><td>${formatMoney(totals.food, currency)}</td></tr>
+<tr><td>Activities</td><td>${formatMoney(totals.activities, currency)}</td></tr>
+<tr><td>Local transport</td><td>${formatMoney(totals.localTransport, currency)}</td></tr>
+<tr><td>Travel insurance</td><td>${formatMoney(totals.insurance, currency)}</td></tr>
+<tr><td>Other / miscellaneous</td><td>${formatMoney(safeInput.misc, currency)}</td></tr>
+<tr><td>${safeInput.bufferPct}% safety buffer</td><td>${formatMoney(totals.buffer, currency)}</td></tr>
 </tbody></table>
 <h2>Packing starter</h2>
 <p class="check">☐ Passport / ID and travel documents</p>
@@ -132,6 +102,27 @@ body{font-family:Arial,sans-serif;max-width:860px;margin:40px auto;padding:0 22p
     URL.revokeObjectURL(url);
   };
 
+  const requestDownload = () => {
+    trackEvent("travel_pack_cta_click", {
+      currency,
+      days,
+      travelers: people,
+      estimated_total: Math.round(totals.total),
+    });
+
+    const requestEvent = new CustomEvent("guidevexa:travel-pack-request", {
+      cancelable: true,
+      detail: {
+        slot: "travel-pack",
+        complete: startDownload,
+      },
+    });
+
+    if (window.dispatchEvent(requestEvent)) startDownload();
+  };
+
+  const plannerHref = `/tools/travel-budget-planner?${buildTravelBudgetQuery(safeInput)}`;
+
   return (
     <div className="landing-page">
       <section className="landing-hero shell">
@@ -147,22 +138,22 @@ body{font-family:Arial,sans-serif;max-width:860px;margin:40px auto;padding:0 22p
             <li>Printable daily planner</li>
           </ul>
 
-          <button id="get-pack" className="button landing-primary-cta" data-ogads-slot="travel-pack" onClick={downloadPack}>
+          <button id="get-pack" className="button landing-primary-cta" data-ogads-slot="travel-pack" onClick={requestDownload}>
             Download my travel pack
           </button>
           <p className="landing-cta-note">Built from your planner inputs. No account required in the current V1.</p>
-          <Link className="landing-back-link" href="/tools/travel-budget-planner">← Edit my budget first</Link>
+          <Link className="landing-back-link" href={plannerHref}>← Edit my budget first</Link>
         </div>
 
         <div className="travel-pack-preview" aria-label="Preview of your GuideVexa travel pack">
           <div className="preview-sheet">
             <div className="preview-sheet-brand">GuideVexa Travel Pack</div>
-            <h2>{input.destination || "Your trip"}</h2>
+            <h2>{safeInput.destination || "Your trip"}</h2>
             <p>{days} days · {people} traveler{people === 1 ? "" : "s"}</p>
-            <div className="preview-total"><span>Estimated total</span><strong>{formatMoney(total, input.currency)}</strong></div>
+            <div className="preview-total"><span>Estimated total</span><strong>{formatMoney(totals.total, currency)}</strong></div>
             <div className="preview-mini-grid">
-              <div><span>Per traveler</span><strong>{formatMoney(perPerson, input.currency)}</strong></div>
-              <div><span>Per day</span><strong>{formatMoney(perDay, input.currency)}</strong></div>
+              <div><span>Per traveler</span><strong>{formatMoney(totals.perPerson, currency)}</strong></div>
+              <div><span>Per day</span><strong>{formatMoney(totals.perDay, currency)}</strong></div>
             </div>
             <div className="preview-lines"><i></i><i></i><i></i><i></i></div>
             <div className="preview-checks"><span>✓ Budget</span><span>✓ Packing</span><span>✓ Daily plan</span></div>
@@ -205,7 +196,7 @@ body{font-family:Arial,sans-serif;max-width:860px;margin:40px auto;padding:0 22p
       <section className="landing-final-cta shell">
         <h2>Keep your trip plan in one place.</h2>
         <p>Download the pack built from the budget you already created.</p>
-        <button className="button landing-primary-cta" data-ogads-slot="travel-pack" onClick={downloadPack}>Download my travel pack</button>
+        <button className="button landing-primary-cta" data-ogads-slot="travel-pack" onClick={requestDownload}>Download my travel pack</button>
       </section>
     </div>
   );
