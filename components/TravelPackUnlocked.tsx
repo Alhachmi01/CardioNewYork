@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { trackEvent } from "@/lib/analytics";
-import { downloadTravelPack, readTravelPackSession } from "@/lib/travelPack";
+import { downloadTravelPack, readTravelPackSessionState } from "@/lib/travelPack";
 import {
   buildTravelBudgetQuery,
   calculateTravelBudget,
@@ -11,10 +11,38 @@ import {
   type TravelBudgetInput,
 } from "@/lib/travelBudget";
 
+const verificationAttempts = 12;
+const verificationDelayMs = 750;
+
+async function isUnlockVerified(sessionId: string) {
+  try {
+    const response = await fetch(`/api/ogads/unlock-status?sessionId=${encodeURIComponent(sessionId)}`, {
+      cache: "no-store",
+    });
+    if (!response.ok) return false;
+    const body = await response.json() as { verified?: boolean };
+    return body.verified === true;
+  } catch {
+    return false;
+  }
+}
+
+async function waitForUnlockVerification(sessionId: string) {
+  for (let attempt = 0; attempt < verificationAttempts; attempt += 1) {
+    if (await isUnlockVerified(sessionId)) return true;
+    if (attempt < verificationAttempts - 1) {
+      await new Promise(resolve => window.setTimeout(resolve, verificationDelayMs));
+    }
+  }
+  return false;
+}
+
 export function TravelPackUnlocked() {
   const [input, setInput] = useState<TravelBudgetInput | null>(null);
-  const [missingState, setMissingState] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [status, setStatus] = useState<"checking" | "verified" | "pending" | "missing">("checking");
   const hasHandledRedirect = useRef(false);
+  const hasTrackedCompletion = useRef(false);
 
   const runDownload = (travelInput: TravelBudgetInput) => {
     const totals = calculateTravelBudget(travelInput);
@@ -27,50 +55,81 @@ export function TravelPackUnlocked() {
     downloadTravelPack(travelInput);
   };
 
+  const handleVerified = (travelInput: TravelBudgetInput) => {
+    setStatus("verified");
+    if (!hasTrackedCompletion.current) {
+      hasTrackedCompletion.current = true;
+      const totals = calculateTravelBudget(travelInput);
+      trackEvent("locker_complete", {
+        currency: travelInput.currency,
+        days: travelInput.days,
+        travelers: travelInput.people,
+        estimated_total: Math.round(totals.total),
+      });
+    }
+    window.setTimeout(() => runDownload(travelInput), 350);
+  };
+
   useEffect(() => {
     if (hasHandledRedirect.current) return;
     hasHandledRedirect.current = true;
 
-    const storedInput = readTravelPackSession();
-    if (!storedInput) {
-      setMissingState(true);
+    const stored = readTravelPackSessionState();
+    if (!stored?.input || !stored.ogAdsSessionId) {
+      setStatus("missing");
       return;
     }
 
-    setInput(storedInput);
-    const totals = calculateTravelBudget(storedInput);
-    trackEvent("locker_complete", {
-      currency: storedInput.currency,
-      days: storedInput.days,
-      travelers: storedInput.people,
-      estimated_total: Math.round(totals.total),
+    setInput(stored.input);
+    setSessionId(stored.ogAdsSessionId);
+
+    let cancelled = false;
+    void waitForUnlockVerification(stored.ogAdsSessionId).then(verified => {
+      if (cancelled) return;
+      if (verified) {
+        handleVerified(stored.input);
+      } else {
+        setStatus("pending");
+      }
     });
 
-    const timer = window.setTimeout(() => runDownload(storedInput), 350);
-    return () => window.clearTimeout(timer);
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  if (missingState) {
+  const retryVerification = async () => {
+    if (!input || !sessionId) return;
+    setStatus("checking");
+    const verified = await waitForUnlockVerification(sessionId);
+    if (verified) {
+      handleVerified(input);
+    } else {
+      setStatus("pending");
+    }
+  };
+
+  if (status === "missing") {
     return (
       <section className="page shell prose-page">
         <div className="page-intro">
-          <h1>Your travel pack is unlocked.</h1>
-          <p>We could not recover the trip details from this browser tab.</p>
+          <h1>We could not restore this unlock session.</h1>
+          <p>The trip details or verification session are no longer available in this browser tab.</p>
         </div>
         <div className="prose-block">
-          <p>Return to the Travel Budget Planner, rebuild or restore your budget, then open the travel pack again.</p>
+          <p>Return to the Travel Budget Planner, restore your budget, then open the travel pack again.</p>
           <p><Link className="button" href="/tools/travel-budget-planner">Return to Travel Budget Planner</Link></p>
         </div>
       </section>
     );
   }
 
-  if (!input) {
+  if (!input || status === "checking") {
     return (
       <section className="page shell prose-page">
         <div className="page-intro">
-          <h1>Preparing your travel pack…</h1>
-          <p>Your personalized download is being restored.</p>
+          <h1>Verifying your travel pack unlock…</h1>
+          <p>GuideVexa is waiting for the conversion confirmation before starting the download.</p>
         </div>
       </section>
     );
@@ -79,11 +138,27 @@ export function TravelPackUnlocked() {
   const totals = calculateTravelBudget(input);
   const plannerHref = `/tools/travel-budget-planner?${buildTravelBudgetQuery(input)}`;
 
+  if (status === "pending") {
+    return (
+      <section className="page shell prose-page">
+        <div className="page-intro">
+          <h1>Confirmation is still pending.</h1>
+          <p>We have not received the verified OGAds conversion yet, so the download remains locked.</p>
+        </div>
+        <div className="prose-block">
+          <p>If you just completed an offer, wait a few seconds and retry verification.</p>
+          <p><button className="button" onClick={retryVerification}>Retry verification</button></p>
+          <p><Link className="text-link" href={plannerHref}>Back to Travel Budget Planner →</Link></p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="page shell prose-page">
       <div className="page-intro">
         <h1>Your travel pack is unlocked.</h1>
-        <p>Your download should start automatically. If it does not, use the button below.</p>
+        <p>Your verified download should start automatically. If it does not, use the button below.</p>
       </div>
 
       <div className="prose-block">
