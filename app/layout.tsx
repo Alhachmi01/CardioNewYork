@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import type { ReactNode } from "react";
 import "./globals.css";
 import "./polish.css";
@@ -12,15 +13,7 @@ export const metadata: Metadata = {
   applicationName: siteConfig.name,
   title: { default: "GuideVexa — Free tools for clearer everyday decisions", template: "%s | GuideVexa" },
   description: siteConfig.description,
-  alternates: { canonical: "/" },
   icons: { icon: "/icon.svg" },
-  openGraph: {
-    title: "GuideVexa — Free tools for clearer everyday decisions",
-    description: siteConfig.description,
-    url: siteConfig.url,
-    siteName: siteConfig.name,
-    type: "website",
-  },
 };
 
 export const viewport: Viewport = {
@@ -32,6 +25,9 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
   return (
     <html lang="en">
       <body>
+        <Script id="guidevexa-data-layer" strategy="beforeInteractive">
+          {"window.dataLayer=window.dataLayer||[];"}
+        </Script>
         <SiteHeader />
         <main>{children}</main>
         <SiteFooter />
