@@ -13,8 +13,8 @@ import {
   type TravelBudgetInput,
 } from "@/lib/travelBudget";
 
-const ogAdsScriptUrl = "https://appsave.online/cl/js/krnllq";
-const ogAdsDirectUrl = "https://appsave.online/cl/i/krnllq";
+const ogAdsScriptBaseUrl = "https://appsave.online/cl/js/krnllq";
+const ogAdsDirectBaseUrl = "https://appsave.online/cl/i/krnllq";
 const ogAdsWaitTimeoutMs = 8000;
 const ogAdsPollIntervalMs = 100;
 
@@ -47,12 +47,19 @@ function waitForOgAdsLoader() {
   });
 }
 
-export function TravelPackLanding(input: TravelBudgetInput) {
+type TravelPackLandingProps = TravelBudgetInput & {
+  ogAdsSessionId: string;
+};
+
+export function TravelPackLanding({ ogAdsSessionId, ...input }: TravelPackLandingProps) {
   const safeInput = normalizeTravelBudgetInput(input);
   const totals = calculateTravelBudget(safeInput);
   const { days, people, currency } = safeInput;
   const hasTrackedView = useRef(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
+  const [unlockError, setUnlockError] = useState<string | null>(null);
+  const ogAdsScriptUrl = `${ogAdsScriptBaseUrl}?aff_sub=${encodeURIComponent(ogAdsSessionId)}`;
+  const ogAdsDirectUrl = `${ogAdsDirectBaseUrl}?aff_sub=${encodeURIComponent(ogAdsSessionId)}`;
 
   useEffect(() => {
     if (hasTrackedView.current) return;
@@ -68,8 +75,9 @@ export function TravelPackLanding(input: TravelBudgetInput) {
   const requestDownload = async () => {
     if (isUnlocking) return;
     setIsUnlocking(true);
+    setUnlockError(null);
 
-    saveTravelPackSession(safeInput);
+    saveTravelPackSession(safeInput, ogAdsSessionId);
 
     trackEvent("travel_pack_cta_click", {
       currency,
@@ -77,6 +85,23 @@ export function TravelPackLanding(input: TravelBudgetInput) {
       travelers: people,
       estimated_total: Math.round(totals.total),
     });
+
+    try {
+      const registration = await fetch("/api/ogads/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: ogAdsSessionId }),
+      });
+
+      if (!registration.ok) {
+        throw new Error("registration_failed");
+      }
+    } catch {
+      trackEvent("locker_registration_failed");
+      setUnlockError("The unlock service is temporarily unavailable. Please try again in a moment.");
+      setIsUnlocking(false);
+      return;
+    }
 
     const loaderReady = await waitForOgAdsLoader();
 
@@ -126,6 +151,7 @@ export function TravelPackLanding(input: TravelBudgetInput) {
             {ctaLabel}
           </button>
           <p className="landing-cta-note">Built from your planner inputs. One third-party offer completion is required to unlock this download.</p>
+          {unlockError ? <p className="landing-cta-note" role="alert">{unlockError}</p> : null}
           <Link className="landing-back-link" href={plannerHref}>← Edit my budget first</Link>
         </div>
 
