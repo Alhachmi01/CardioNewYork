@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 import "./polish.css";
@@ -8,9 +8,11 @@ import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
+  applicationName: siteConfig.name,
   title: { default: "GuideVexa — Free tools for clearer everyday decisions", template: "%s | GuideVexa" },
   description: siteConfig.description,
   alternates: { canonical: "/" },
+  icons: { icon: "/icon.svg" },
   openGraph: {
     title: "GuideVexa — Free tools for clearer everyday decisions",
     description: siteConfig.description,
@@ -18,6 +20,11 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     type: "website",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#090b12",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
