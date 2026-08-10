@@ -1,6 +1,6 @@
 export const siteConfig = {
   name: "GuideVexa",
-  url: "https://guidevexa.com",
+  url: "https://www.guidevexa.com",
   description:
     "Fast, practical web tools and clear guides that help you plan, calculate and get things done.",
 };
@@ -18,7 +18,7 @@ export const tools: ToolDefinition[] = [
   {
     slug: "travel-budget-planner",
     name: "Travel Budget Planner",
-    description: "Estimate a trip budget by days, travelers, lodging, food and activities.",
+    description: "Estimate a complete trip budget with flights, lodging, food, activities, transport and a safety buffer.",
     category: "Travel",
     icon: "✈",
     featured: true,
@@ -48,26 +48,45 @@ export const tools: ToolDefinition[] = [
   },
 ];
 
-export const guides = [
+export type GuideDefinition = {
+  slug: string;
+  title: string;
+  description: string;
+  readTime: string;
+  category: "Travel" | "Calculators";
+};
+
+export const guides: GuideDefinition[] = [
   {
-    title: "How to build a realistic travel budget",
-    description: "A simple framework for transport, lodging, food, activities and contingency money.",
+    slug: "how-to-plan-a-travel-budget",
+    title: "How to plan a realistic travel budget",
+    description: "A simple framework for flights, lodging, food, activities, local transport and contingency money.",
+    readTime: "7 min",
+    category: "Travel",
+  },
+  {
+    slug: "how-much-money-do-i-need-for-a-trip",
+    title: "How much money do I need for a trip?",
+    description: "A practical way to estimate total cost, daily spending and per-person budget before you book.",
     readTime: "6 min",
     category: "Travel",
   },
   {
+    slug: "15-minute-packing-system",
     title: "The 15-minute packing system",
     description: "A repeatable checklist method that cuts last-minute packing mistakes.",
     readTime: "5 min",
     category: "Travel",
   },
   {
+    slug: "percentage-calculations-without-confusion",
     title: "Percentage calculations without confusion",
     description: "Discounts, markups, percentage increase and percentage difference explained simply.",
     readTime: "7 min",
     category: "Calculators",
   },
   {
+    slug: "choose-the-right-unit-for-conversions",
     title: "How to choose the right unit when converting measurements",
     description: "A quick guide to common metric and imperial measurement conversions.",
     readTime: "4 min",
