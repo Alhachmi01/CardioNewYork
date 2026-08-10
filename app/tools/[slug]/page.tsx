@@ -3,8 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ToolRenderer } from "@/components/ToolRenderer";
 import { tools } from "@/lib/site";
+import { parseTravelBudgetSearchParams, type TravelBudgetSearchParams } from "@/lib/travelBudget";
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<TravelBudgetSearchParams>;
+};
 
 export function generateStaticParams() {
   return tools.map(tool => ({ slug: tool.slug }));
@@ -28,12 +32,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ToolPage({ params }: Props) {
+export default async function ToolPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const tool = tools.find(item => item.slug === slug);
   if (!tool) notFound();
 
   const isTravelBudget = slug === "travel-budget-planner";
+  const initialTravelBudget = isTravelBudget
+    ? parseTravelBudgetSearchParams(await searchParams)
+    : undefined;
 
   return (
     <section className="page shell tool-page">
@@ -46,7 +53,7 @@ export default async function ToolPage({ params }: Props) {
         <p>{tool.description}</p>
       </div>
 
-      <ToolRenderer slug={slug} />
+      <ToolRenderer slug={slug} initialTravelBudget={initialTravelBudget} />
 
       {isTravelBudget ? (
         <div className="content-note">
