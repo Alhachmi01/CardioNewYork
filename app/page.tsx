@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowIcon } from "@/components/ArrowIcon";
+import { JsonLd } from "@/components/JsonLd";
 import { ToolCard } from "@/components/ToolCard";
 import { guides, siteConfig, tools } from "@/lib/site";
 
@@ -20,6 +21,17 @@ export default function HomePage() {
 
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: siteConfig.name,
+          url: siteConfig.url,
+          description: siteConfig.description,
+          inLanguage: "en",
+        }}
+      />
+
       <section className="hero shell hero-polished">
         <div className="hero-copy">
           <p className="hero-kicker">TOOLS · PLANNING · GUIDES</p>
