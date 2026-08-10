@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "About", description: "About GuideVexa and the principles behind its tools and guides." };
+const description = "About GuideVexa and the principles behind its tools and guides.";
+
+export const metadata: Metadata = {
+  title: "About",
+  description,
+  alternates: { canonical: "/about" },
+  openGraph: { title: "About GuideVexa", description, url: "/about", type: "website" },
+};
 
 export default function AboutPage() {
   return (
