@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import "./polish.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
-  title: { default: "GuideVexa — Practical tools and guides", template: "%s | GuideVexa" },
+  title: { default: "GuideVexa — Free tools for clearer everyday decisions", template: "%s | GuideVexa" },
   description: siteConfig.description,
   alternates: { canonical: "/" },
   openGraph: {
-    title: "GuideVexa — Practical tools and guides",
+    title: "GuideVexa — Free tools for clearer everyday decisions",
     description: siteConfig.description,
     url: siteConfig.url,
     siteName: siteConfig.name,
