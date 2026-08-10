@@ -10,12 +10,27 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { siteConfig } from "@/lib/site";
 
+const defaultTitle = "GuideVexa — Free tools for clearer everyday decisions";
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   applicationName: siteConfig.name,
-  title: { default: "GuideVexa — Free tools for clearer everyday decisions", template: "%s | GuideVexa" },
+  title: { default: defaultTitle, template: "%s | GuideVexa" },
   description: siteConfig.description,
   icons: { icon: "/icon.svg" },
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: "website",
+    siteName: siteConfig.name,
+    title: defaultTitle,
+    description: siteConfig.description,
+    url: "/",
+  },
+  twitter: {
+    card: "summary",
+    title: defaultTitle,
+    description: siteConfig.description,
+  },
 };
 
 export const viewport: Viewport = {
