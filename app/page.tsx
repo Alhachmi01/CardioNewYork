@@ -1,7 +1,19 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowIcon } from "@/components/ArrowIcon";
 import { ToolCard } from "@/components/ToolCard";
-import { guides, tools } from "@/lib/site";
+import { guides, siteConfig, tools } from "@/lib/site";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "GuideVexa — Free tools for clearer everyday decisions",
+    description: siteConfig.description,
+    url: "/",
+    siteName: siteConfig.name,
+    type: "website",
+  },
+};
 
 export default function HomePage() {
   const featured = tools.filter(tool => tool.featured).slice(0, 3);
