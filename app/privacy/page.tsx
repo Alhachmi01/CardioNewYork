@@ -33,6 +33,11 @@ export default function PrivacyPage() {
           The Complete Travel Pack can use an OGAds content locker that requires one available third-party offer completion before the download is unlocked. The locker may be delivered through an OGAds-managed or shared domain. When you open the locker, choose an offer or submit information to an offer provider, OGAds and the relevant independent provider may process information under their own terms and privacy policies. GuideVexa does not present those third-party forms as GuideVexa forms.
         </p>
 
+        <h2>Short-lived unlock verification</h2>
+        <p>
+          To prevent an unverified travel-pack download, GuideVexa stores a short-lived random unlock-session identifier and conversion metadata returned by the unlock provider. That metadata can include an offer identifier, payout value, provider reference, conversion timestamp and a provider-supplied session IP address. It is used only to confirm the unlock state and expires automatically.
+        </p>
+
         <h2>Technical information</h2>
         <p>
           Our hosting, analytics, network and unlock-service providers may process ordinary technical request data needed to deliver, measure and protect the website, such as IP address, browser information, timestamps and requested URLs, according to their own service terms and privacy practices.
