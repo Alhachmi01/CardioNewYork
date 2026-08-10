@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 
+const description = "Contact and support information for GuideVexa.";
+
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Contact and support information for GuideVexa.",
+  description,
+  alternates: { canonical: "/contact" },
+  openGraph: { title: "Contact GuideVexa", description, url: "/contact", type: "website" },
 };
 
 export default function ContactPage() {
