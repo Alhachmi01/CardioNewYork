@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Script from "next/script";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { saveTravelPackSession } from "@/lib/travelPack";
 import {
@@ -15,6 +15,8 @@ import {
 
 const ogAdsScriptUrl = "https://appsave.online/cl/js/krnllq";
 const ogAdsDirectUrl = "https://appsave.online/cl/i/krnllq";
+const ogAdsWaitTimeoutMs = 8000;
+const ogAdsPollIntervalMs = 100;
 
 declare global {
   interface Window {
@@ -22,11 +24,35 @@ declare global {
   }
 }
 
+function waitForOgAdsLoader() {
+  return new Promise<boolean>(resolve => {
+    if (typeof window.og_load === "function") {
+      resolve(true);
+      return;
+    }
+
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      if (typeof window.og_load === "function") {
+        window.clearInterval(timer);
+        resolve(true);
+        return;
+      }
+
+      if (Date.now() - startedAt >= ogAdsWaitTimeoutMs) {
+        window.clearInterval(timer);
+        resolve(false);
+      }
+    }, ogAdsPollIntervalMs);
+  });
+}
+
 export function TravelPackLanding(input: TravelBudgetInput) {
   const safeInput = normalizeTravelBudgetInput(input);
   const totals = calculateTravelBudget(safeInput);
   const { days, people, currency } = safeInput;
   const hasTrackedView = useRef(false);
+  const [isUnlocking, setIsUnlocking] = useState(false);
 
   useEffect(() => {
     if (hasTrackedView.current) return;
@@ -39,7 +65,10 @@ export function TravelPackLanding(input: TravelBudgetInput) {
     });
   }, [currency, days, people, totals.total]);
 
-  const requestDownload = () => {
+  const requestDownload = async () => {
+    if (isUnlocking) return;
+    setIsUnlocking(true);
+
     saveTravelPackSession(safeInput);
 
     trackEvent("travel_pack_cta_click", {
@@ -49,23 +78,25 @@ export function TravelPackLanding(input: TravelBudgetInput) {
       estimated_total: Math.round(totals.total),
     });
 
-    const method = typeof window.og_load === "function" ? "javascript" : "direct_fallback";
-    trackEvent("locker_open", { method });
+    const loaderReady = await waitForOgAdsLoader();
 
-    if (typeof window.og_load === "function") {
+    if (loaderReady && typeof window.og_load === "function") {
+      trackEvent("locker_open", { method: "javascript" });
       try {
         window.og_load();
+        window.setTimeout(() => setIsUnlocking(false), 1200);
         return;
       } catch {
-        window.location.assign(ogAdsDirectUrl);
-        return;
+        // Fall through to the official direct-link fallback below.
       }
     }
 
+    trackEvent("locker_open", { method: "direct_fallback" });
     window.location.assign(ogAdsDirectUrl);
   };
 
   const plannerHref = `/tools/travel-budget-planner?${buildTravelBudgetQuery(safeInput)}`;
+  const ctaLabel = isUnlocking ? "Preparing unlock…" : "Unlock & download my travel pack";
 
   return (
     <div className="landing-page">
@@ -84,8 +115,15 @@ export function TravelPackLanding(input: TravelBudgetInput) {
             <li>Printable daily planner</li>
           </ul>
 
-          <button id="get-pack" className="button landing-primary-cta" data-ogads-slot="travel-pack" onClick={requestDownload}>
-            Unlock & download my travel pack
+          <button
+            id="get-pack"
+            className="button landing-primary-cta"
+            data-ogads-slot="travel-pack"
+            onClick={requestDownload}
+            disabled={isUnlocking}
+            aria-busy={isUnlocking}
+          >
+            {ctaLabel}
           </button>
           <p className="landing-cta-note">Built from your planner inputs. One third-party offer completion is required to unlock this download.</p>
           <Link className="landing-back-link" href={plannerHref}>← Edit my budget first</Link>
@@ -142,7 +180,15 @@ export function TravelPackLanding(input: TravelBudgetInput) {
       <section className="landing-final-cta shell">
         <h2>Keep your trip plan in one place.</h2>
         <p>Unlock the pack built from the budget you already created.</p>
-        <button className="button landing-primary-cta" data-ogads-slot="travel-pack" onClick={requestDownload}>Unlock & download my travel pack</button>
+        <button
+          className="button landing-primary-cta"
+          data-ogads-slot="travel-pack"
+          onClick={requestDownload}
+          disabled={isUnlocking}
+          aria-busy={isUnlocking}
+        >
+          {ctaLabel}
+        </button>
       </section>
     </div>
   );
