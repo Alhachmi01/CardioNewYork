@@ -22,7 +22,7 @@ button, input, select { font: inherit; }
 .brand-mark { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), #5b5bf7); color: white; font-size: 14px; box-shadow: 0 0 28px rgba(139,92,246,.24); }
 .nav { display: flex; gap: 28px; color: #c5cbd8; font-size: 14px; }
 .nav a:hover, .footer-links a:hover { color: white; }
-.button { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 20px; border: 1px solid transparent; border-radius: 12px; background: linear-gradient(135deg, var(--accent), #6654e8); color: white; font-weight: 700; cursor: pointer; box-shadow: 0 10px 35px rgba(111,83,220,.22); }
+.button { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 20px; border: 1px solid transparent; border-radius: 12px; background: linear-gradient(135deg, var(--accent), #6654e8); color: white; font-weight: 700; cursor: pointer; box-shadow: 0 10px 35px rgba(111,83,220,.22); transition: transform .18s ease, filter .18s ease, border-color .18s ease; }
 .button:hover { filter: brightness(1.08); transform: translateY(-1px); }
 .button-small { min-height: 38px; padding: 0 15px; font-size: 13px; }
 .button-ghost { background: transparent; border-color: var(--border); box-shadow: none; }
@@ -101,13 +101,48 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px r
 .footer-brand { margin-bottom: 12px; }
 .footer-links { display: flex; flex-wrap: wrap; gap: 22px; align-items: start; color: #aab2c3; font-size: 14px; }
 .footer-bottom { margin-top: 34px; padding-top: 20px; border-top: 1px solid var(--border); color: #737d92; font-size: 13px; }
+
+/* Travel Budget Planner V2 */
+.travel-budget-v2 { grid-template-columns: minmax(0, 1.25fr) minmax(310px, .75fr); }
+.travel-budget-v2 .tool-form { padding: 0; overflow: hidden; }
+.tool-form-section { padding: 24px; border-bottom: 1px solid var(--border); }
+.tool-form-section:last-of-type { border-bottom: 0; }
+.section-label { margin: 0 0 16px; color: var(--accent-2); font-size: 12px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+.helper-text { margin: 16px 24px 24px; color: #7f899d; font-size: 12px; line-height: 1.55; }
+.compact-helper { margin: 12px 0 0; text-align: center; }
+.result-destination { margin: 4px 0 0; font-size: 13px; }
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+.summary-card { padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: #0d111c; }
+.summary-card span { display: block; color: #7f899d; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+.summary-card strong { display: block; margin-top: 4px; font-size: 17px; }
+.budget-status { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 12px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); font-size: 13px; }
+.budget-status.under { background: rgba(110,231,183,.08); border-color: rgba(110,231,183,.25); color: #b8f5de; }
+.budget-status.over { background: rgba(248,113,113,.08); border-color: rgba(248,113,113,.25); color: #fecaca; }
+.budget-actions .button + .button { margin-top: 10px; }
+
+.guide-card-link { display: block; }
+.article-row-link { transition: background .18s ease, transform .18s ease; }
+.article-row-link:hover { background: rgba(255,255,255,.018); }
+.article-row-link:hover h2 { color: var(--accent-2); }
+.guide-article { max-width: 820px; }
+.guide-article .page-intro { margin-bottom: 30px; }
+.guide-meta { display: flex; flex-wrap: wrap; gap: 10px 16px; color: #7f899d; font-size: 13px; margin-top: 12px; }
+.guide-body { max-width: 760px; }
+.guide-body h2 { margin-top: 44px; font-size: 30px; }
+.guide-body h3 { margin-top: 28px; font-size: 21px; }
+.guide-body p, .guide-body li { color: #aab2c3; }
+.guide-body ul { padding-left: 20px; }
+.guide-callout { margin: 28px 0; padding: 18px 20px; background: rgba(139,92,246,.08); border: 1px solid rgba(139,92,246,.2); border-radius: 14px; color: #d8cdfd; }
+.guide-cta { margin-top: 38px; padding: 24px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.guide-cta h2 { margin-top: 0; font-size: 26px; }
+
 @media (max-width: 860px) {
   .nav { display: none; }
   .hero { min-height: auto; padding: 70px 0 46px; grid-template-columns: 1fr; gap: 42px; }
   .hero h1 { font-size: clamp(43px, 13vw, 64px); }
   .tool-grid { grid-template-columns: 1fr 1fr; }
   .split-section { grid-template-columns: 1fr; gap: 40px; }
-  .tool-layout { grid-template-columns: 1fr; }
+  .tool-layout, .travel-budget-v2 { grid-template-columns: 1fr; }
   .result-box { position: static; }
 }
 @media (max-width: 590px) {
@@ -127,4 +162,17 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px r
   .field-grid, .field-grid.two { grid-template-columns: 1fr; }
   .footer-grid { flex-direction: column; }
   .article-row { grid-template-columns: 40px 1fr; gap: 14px; }
+  .big-number { font-size: 42px; }
+  .summary-grid { grid-template-columns: 1fr; }
+}
+
+@media print {
+  .site-header, .site-footer, .breadcrumbs, .tool-form, .content-note, .budget-actions { display: none !important; }
+  body { background: white; color: black; }
+  .page { padding: 20px 0; }
+  .tool-layout, .travel-budget-v2 { display: block; }
+  .result-box { position: static; background: white; color: black; border-color: #ccc; box-shadow: none; }
+  .muted, .breakdown div, .summary-card span { color: #444; }
+  .breakdown strong, .summary-card strong { color: black; }
+  .summary-card { background: white; border-color: #ddd; }
 }
