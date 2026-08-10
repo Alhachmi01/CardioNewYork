@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Script from "next/script";
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@/lib/analytics";
+import { saveTravelPackSession } from "@/lib/travelPack";
 import {
   buildTravelBudgetQuery,
   calculateTravelBudget,
@@ -11,14 +13,13 @@ import {
   type TravelBudgetInput,
 } from "@/lib/travelBudget";
 
-function escapeHtml(value: string) {
-  return value.replace(/[&<>'"]/g, character => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    "'": "&#39;",
-    '"': "&quot;",
-  })[character] ?? character);
+const ogAdsScriptUrl = "https://appsave.online/cl/js/krnllq";
+const ogAdsDirectUrl = "https://appsave.online/cl/i/krnllq";
+
+declare global {
+  interface Window {
+    og_load?: () => void;
+  }
 }
 
 export function TravelPackLanding(input: TravelBudgetInput) {
@@ -38,71 +39,9 @@ export function TravelPackLanding(input: TravelBudgetInput) {
     });
   }, [currency, days, people, totals.total]);
 
-  const startDownload = () => {
-    trackEvent("download_start", {
-      currency,
-      days,
-      travelers: people,
-      estimated_total: Math.round(totals.total),
-    });
-
-    const destination = escapeHtml(safeInput.destination || "Your trip");
-    const plannerRows = Array.from({ length: Math.min(days, 60) }, (_, index) => (
-      `<tr><td>Day ${index + 1}</td><td></td><td></td><td></td></tr>`
-    )).join("");
-
-    const packHtml = `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>GuideVexa Travel Pack — ${destination}</title>
-<style>
-body{font-family:Arial,sans-serif;max-width:860px;margin:40px auto;padding:0 22px;color:#172033;line-height:1.5}h1{font-size:32px;margin-bottom:6px}h2{margin-top:34px;border-bottom:1px solid #d8deea;padding-bottom:8px}.meta{color:#657086}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.card{border:1px solid #d8deea;border-radius:10px;padding:14px}.card small{display:block;color:#657086}.card strong{font-size:20px}.rows{width:100%;border-collapse:collapse}.rows td,.rows th{border:1px solid #d8deea;padding:9px;text-align:left}.check{margin:7px 0}.note{margin-top:30px;padding:14px;background:#f3f5f9;border-radius:10px;color:#4b5565}@media(max-width:620px){.grid{grid-template-columns:1fr}.rows{font-size:12px}}
-</style>
-</head>
-<body>
-<h1>GuideVexa Complete Travel Pack</h1>
-<p class="meta">${destination} · ${days} days · ${people} traveler${people === 1 ? "" : "s"} · ${currency}</p>
-<div class="grid">
-<div class="card"><small>Estimated total</small><strong>${formatMoney(totals.total, currency)}</strong></div>
-<div class="card"><small>Per traveler</small><strong>${formatMoney(totals.perPerson, currency)}</strong></div>
-<div class="card"><small>Per day</small><strong>${formatMoney(totals.perDay, currency)}</strong></div>
-</div>
-<h2>Budget breakdown</h2>
-<table class="rows"><tbody>
-<tr><td>Flights</td><td>${formatMoney(totals.flights, currency)}</td></tr>
-<tr><td>Lodging</td><td>${formatMoney(totals.lodging, currency)}</td></tr>
-<tr><td>Food</td><td>${formatMoney(totals.food, currency)}</td></tr>
-<tr><td>Activities</td><td>${formatMoney(totals.activities, currency)}</td></tr>
-<tr><td>Local transport</td><td>${formatMoney(totals.localTransport, currency)}</td></tr>
-<tr><td>Travel insurance</td><td>${formatMoney(totals.insurance, currency)}</td></tr>
-<tr><td>Other / miscellaneous</td><td>${formatMoney(safeInput.misc, currency)}</td></tr>
-<tr><td>${safeInput.bufferPct}% safety buffer</td><td>${formatMoney(totals.buffer, currency)}</td></tr>
-</tbody></table>
-<h2>Packing starter</h2>
-<p class="check">☐ Passport / ID and travel documents</p>
-<p class="check">☐ Payment card + backup payment method</p>
-<p class="check">☐ Phone charger / power bank</p>
-<p class="check">☐ Medication and basic health items</p>
-<p class="check">☐ Weather-appropriate clothing</p>
-<p class="check">☐ Comfortable walking shoes</p>
-<p class="check">☐ Reusable water bottle</p>
-<h2>Daily planner</h2>
-<table class="rows"><thead><tr><th>Day</th><th>Main plan</th><th>Bookings</th><th>Notes / spend</th></tr></thead><tbody>${plannerRows}</tbody></table>
-<p class="note">Planning estimate only. Recheck current fares, hotel rates, exchange rates and entry requirements before booking.</p>
-</body>
-</html>`;
-
-    const url = URL.createObjectURL(new Blob([packHtml], { type: "text/html;charset=utf-8" }));
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = "guidevexa-complete-travel-pack.html";
-    anchor.click();
-    URL.revokeObjectURL(url);
-  };
-
   const requestDownload = () => {
+    saveTravelPackSession(safeInput);
+
     trackEvent("travel_pack_cta_click", {
       currency,
       days,
@@ -110,21 +49,28 @@ body{font-family:Arial,sans-serif;max-width:860px;margin:40px auto;padding:0 22p
       estimated_total: Math.round(totals.total),
     });
 
-    const requestEvent = new CustomEvent("guidevexa:travel-pack-request", {
-      cancelable: true,
-      detail: {
-        slot: "travel-pack",
-        complete: startDownload,
-      },
-    });
+    const method = typeof window.og_load === "function" ? "javascript" : "direct_fallback";
+    trackEvent("locker_open", { method });
 
-    if (window.dispatchEvent(requestEvent)) startDownload();
+    if (typeof window.og_load === "function") {
+      try {
+        window.og_load();
+        return;
+      } catch {
+        window.location.assign(ogAdsDirectUrl);
+        return;
+      }
+    }
+
+    window.location.assign(ogAdsDirectUrl);
   };
 
   const plannerHref = `/tools/travel-budget-planner?${buildTravelBudgetQuery(safeInput)}`;
 
   return (
     <div className="landing-page">
+      <Script id="ogjs" src={ogAdsScriptUrl} strategy="afterInteractive" />
+
       <section className="landing-hero shell">
         <div className="landing-hero-copy">
           <h1>Your complete travel plan, in one downloadable pack.</h1>
@@ -139,9 +85,9 @@ body{font-family:Arial,sans-serif;max-width:860px;margin:40px auto;padding:0 22p
           </ul>
 
           <button id="get-pack" className="button landing-primary-cta" data-ogads-slot="travel-pack" onClick={requestDownload}>
-            Download my travel pack
+            Unlock & download my travel pack
           </button>
-          <p className="landing-cta-note">Built from your planner inputs. No account required in the current V1.</p>
+          <p className="landing-cta-note">Built from your planner inputs. One third-party offer completion is required to unlock this download.</p>
           <Link className="landing-back-link" href={plannerHref}>← Edit my budget first</Link>
         </div>
 
@@ -182,21 +128,21 @@ body{font-family:Arial,sans-serif;max-width:860px;margin:40px auto;padding:0 22p
         <ol>
           <li><strong>1. Build your budget</strong><span>Use the free Travel Budget Planner with your real trip numbers.</span></li>
           <li><strong>2. Review your pack</strong><span>This page turns those inputs into a clean travel-pack preview.</span></li>
-          <li><strong>3. Download and personalise</strong><span>Save the pack, open it in your browser and print it or add your own notes.</span></li>
+          <li><strong>3. Unlock and download</strong><span>Complete one available third-party offer, then return to GuideVexa for your personalized download.</span></li>
         </ol>
       </section>
 
       <section className="landing-section landing-faq shell">
         <div className="landing-section-heading"><h2>Frequently asked questions</h2></div>
         <details><summary>Is the travel pack a live booking quote?</summary><p>No. It is a planning resource based on the numbers you entered. Recheck live prices before booking.</p></details>
-        <details><summary>Do I need an account?</summary><p>No account is required for the current V1 travel-pack download.</p></details>
-        <details><summary>What format do I receive?</summary><p>The current pack downloads as a self-contained HTML document that you can open in a browser and print or save as PDF.</p></details>
+        <details><summary>Do I need an account?</summary><p>No GuideVexa account is required. The unlock step is handled by an independent third-party offer provider.</p></details>
+        <details><summary>What format do I receive?</summary><p>The pack downloads as a self-contained HTML document that you can open in a browser and print or save as PDF.</p></details>
       </section>
 
       <section className="landing-final-cta shell">
         <h2>Keep your trip plan in one place.</h2>
-        <p>Download the pack built from the budget you already created.</p>
-        <button className="button landing-primary-cta" data-ogads-slot="travel-pack" onClick={requestDownload}>Download my travel pack</button>
+        <p>Unlock the pack built from the budget you already created.</p>
+        <button className="button landing-primary-cta" data-ogads-slot="travel-pack" onClick={requestDownload}>Unlock & download my travel pack</button>
       </section>
     </div>
   );
