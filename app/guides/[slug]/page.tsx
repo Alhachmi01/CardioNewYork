@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { guides } from "@/lib/site";
+import { JsonLd } from "@/components/JsonLd";
+import { guides, siteConfig } from "@/lib/site";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -197,40 +198,66 @@ export default async function GuidePage({ params }: Props) {
 
   if (!guide || !article) notFound();
 
+  const canonicalUrl = `${siteConfig.url}/guides/${guide.slug}`;
+
   return (
-    <article className="page shell guide-article">
-      <div className="breadcrumbs">
-        <Link href="/">Home</Link><span>/</span><Link href="/guides">Guides</Link><span>/</span><span>{guide.title}</span>
-      </div>
+    <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: guide.title,
+          description: guide.description,
+          url: canonicalUrl,
+          mainEntityOfPage: canonicalUrl,
+          inLanguage: "en",
+          author: {
+            "@type": "Organization",
+            name: siteConfig.name,
+            url: siteConfig.url,
+          },
+          publisher: {
+            "@type": "Organization",
+            name: siteConfig.name,
+            url: siteConfig.url,
+          },
+        }}
+      />
 
-      <header className="page-intro">
-        <div className="category-label">{guide.category}</div>
-        <h1>{guide.title}</h1>
-        <p>{guide.description}</p>
-        <div className="guide-meta"><span>{guide.readTime} read</span><span>GuideVexa editorial guide</span></div>
-      </header>
+      <article className="page shell guide-article">
+        <div className="breadcrumbs">
+          <Link href="/">Home</Link><span>/</span><Link href="/guides">Guides</Link><span>/</span><span>{guide.title}</span>
+        </div>
 
-      <div className="guide-body">
-        <p className="lead">{article.intro}</p>
+        <header className="page-intro">
+          <div className="category-label">{guide.category}</div>
+          <h1>{guide.title}</h1>
+          <p>{guide.description}</p>
+          <div className="guide-meta"><span>{guide.readTime} read</span><span>GuideVexa editorial guide</span></div>
+        </header>
 
-        {article.sections.map(section => (
-          <section key={section.heading}>
-            <h2>{section.heading}</h2>
-            {section.paragraphs?.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
-            {section.bullets ? <ul>{section.bullets.map(item => <li key={item}>{item}</li>)}</ul> : null}
-          </section>
-        ))}
+        <div className="guide-body">
+          <p className="lead">{article.intro}</p>
 
-        {article.callout ? <div className="guide-callout">{article.callout}</div> : null}
+          {article.sections.map(section => (
+            <section key={section.heading}>
+              <h2>{section.heading}</h2>
+              {section.paragraphs?.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
+              {section.bullets ? <ul>{section.bullets.map(item => <li key={item}>{item}</li>)}</ul> : null}
+            </section>
+          ))}
 
-        {article.toolHref && article.toolLabel ? (
-          <div className="guide-cta">
-            <h2>Put the guide into practice</h2>
-            <p>Use the matching GuideVexa tool with your own numbers and adjust the result as your plan changes.</p>
-            <Link className="button" href={article.toolHref}>{article.toolLabel}</Link>
-          </div>
-        ) : null}
-      </div>
-    </article>
+          {article.callout ? <div className="guide-callout">{article.callout}</div> : null}
+
+          {article.toolHref && article.toolLabel ? (
+            <div className="guide-cta">
+              <h2>Put the guide into practice</h2>
+              <p>Use the matching GuideVexa tool with your own numbers and adjust the result as your plan changes.</p>
+              <Link className="button" href={article.toolHref}>{article.toolLabel}</Link>
+            </div>
+          ) : null}
+        </div>
+      </article>
+    </>
   );
 }
