@@ -4,7 +4,12 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { downloadTravelPack, readTravelPackSession } from "@/lib/travelPack";
-import { calculateTravelBudget, formatMoney, type TravelBudgetInput } from "@/lib/travelBudget";
+import {
+  buildTravelBudgetQuery,
+  calculateTravelBudget,
+  formatMoney,
+  type TravelBudgetInput,
+} from "@/lib/travelBudget";
 
 export function TravelPackUnlocked() {
   const [input, setInput] = useState<TravelBudgetInput | null>(null);
@@ -72,6 +77,7 @@ export function TravelPackUnlocked() {
   }
 
   const totals = calculateTravelBudget(input);
+  const plannerHref = `/tools/travel-budget-planner?${buildTravelBudgetQuery(input)}`;
 
   return (
     <section className="page shell prose-page">
@@ -84,7 +90,7 @@ export function TravelPackUnlocked() {
         <h2>{input.destination || "Your trip"}</h2>
         <p>{input.days} days · {input.people} traveler{input.people === 1 ? "" : "s"} · Estimated total {formatMoney(totals.total, input.currency)}</p>
         <p><button className="button" onClick={() => runDownload(input)}>Download travel pack again</button></p>
-        <p><Link className="text-link" href={`/tools/travel-budget-planner`}>Back to Travel Budget Planner →</Link></p>
+        <p><Link className="text-link" href={plannerHref}>Back to Travel Budget Planner →</Link></p>
       </div>
     </section>
   );
