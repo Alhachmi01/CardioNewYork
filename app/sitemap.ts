@@ -5,8 +5,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes = ["", "/tools", "/guides", "/about", "/contact", "/privacy", "/terms"];
 
   return [
-    ...staticRoutes.map(route => ({ url: `${siteConfig.url}${route}`, lastModified: new Date() })),
-    ...tools.map(tool => ({ url: `${siteConfig.url}/tools/${tool.slug}`, lastModified: new Date() })),
-    ...guides.map(guide => ({ url: `${siteConfig.url}/guides/${guide.slug}`, lastModified: new Date() })),
+    ...staticRoutes.map(route => ({ url: `${siteConfig.url}${route}` })),
+    ...tools.map(tool => ({ url: `${siteConfig.url}/tools/${tool.slug}` })),
+    ...guides.map(guide => ({ url: `${siteConfig.url}/guides/${guide.slug}` })),
   ];
 }
