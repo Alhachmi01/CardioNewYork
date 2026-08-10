@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { JsonLd } from "@/components/JsonLd";
 import { ToolRenderer } from "@/components/ToolRenderer";
-import { tools } from "@/lib/site";
+import { siteConfig, tools } from "@/lib/site";
 import { parseTravelBudgetSearchParams, type TravelBudgetSearchParams } from "@/lib/travelBudget";
 
 type Props = {
@@ -41,33 +42,51 @@ export default async function ToolPage({ params, searchParams }: Props) {
   const initialTravelBudget = isTravelBudget
     ? parseTravelBudgetSearchParams(await searchParams)
     : undefined;
+  const canonicalUrl = `${siteConfig.url}/tools/${tool.slug}`;
 
   return (
-    <section className="page shell tool-page">
-      <div className="breadcrumbs">
-        <Link href="/">Home</Link><span>/</span><Link href="/tools">Tools</Link><span>/</span><span>{tool.name}</span>
-      </div>
-      <div className="page-intro compact">
-        <span className="tool-icon large">{tool.icon}</span>
-        <h1>{tool.name}</h1>
-        <p>{tool.description}</p>
-      </div>
+    <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: tool.name,
+          description: tool.description,
+          url: canonicalUrl,
+          applicationCategory: tool.category,
+          operatingSystem: "Any",
+          browserRequirements: "Requires a modern web browser",
+          isAccessibleForFree: true,
+          inLanguage: "en",
+        }}
+      />
 
-      <ToolRenderer slug={slug} initialTravelBudget={initialTravelBudget} />
+      <section className="page shell tool-page">
+        <div className="breadcrumbs">
+          <Link href="/">Home</Link><span>/</span><Link href="/tools">Tools</Link><span>/</span><span>{tool.name}</span>
+        </div>
+        <div className="page-intro compact">
+          <span className="tool-icon large">{tool.icon}</span>
+          <h1>{tool.name}</h1>
+          <p>{tool.description}</p>
+        </div>
 
-      {isTravelBudget ? (
-        <div className="content-note">
-          <h2>How to get a useful travel budget</h2>
-          <p>Start with current prices for flights and accommodation, then estimate food, activities, local transport and insurance. Keep shared costs separate from per-person costs and add a safety buffer for price changes or unexpected expenses.</p>
-          <p>The result is a planning estimate rather than a live quote. Recheck real prices before booking, especially airfare, hotel rates and exchange rates.</p>
-          <p><Link className="text-link" href="/guides/how-to-plan-a-travel-budget">Read the travel budget guide →</Link></p>
-        </div>
-      ) : (
-        <div className="content-note">
-          <h2>How to use this tool</h2>
-          <p>Enter your values, review the result and adjust the inputs until they match your real situation. GuideVexa tools run in your browser and are designed for quick, practical estimates.</p>
-        </div>
-      )}
-    </section>
+        <ToolRenderer slug={slug} initialTravelBudget={initialTravelBudget} />
+
+        {isTravelBudget ? (
+          <div className="content-note">
+            <h2>How to get a useful travel budget</h2>
+            <p>Start with current prices for flights and accommodation, then estimate food, activities, local transport and insurance. Keep shared costs separate from per-person costs and add a safety buffer for price changes or unexpected expenses.</p>
+            <p>The result is a planning estimate rather than a live quote. Recheck real prices before booking, especially airfare, hotel rates and exchange rates.</p>
+            <p><Link className="text-link" href="/guides/how-to-plan-a-travel-budget">Read the travel budget guide →</Link></p>
+          </div>
+        ) : (
+          <div className="content-note">
+            <h2>How to use this tool</h2>
+            <p>Enter your values, review the result and adjust the inputs until they match your real situation. GuideVexa tools run in your browser and are designed for quick, practical estimates.</p>
+          </div>
+        )}
+      </section>
+    </>
   );
 }
