@@ -1,12 +1,26 @@
-import type { SVGProps } from "react";
+import type { CSSProperties, SVGProps } from "react";
 
-export function ArrowIcon(props: SVGProps<SVGSVGElement>) {
+export function ArrowIcon({
+  width = 18,
+  height = 18,
+  style,
+  ...props
+}: SVGProps<SVGSVGElement>) {
+  const iconStyle: CSSProperties = {
+    display: "block",
+    flex: "0 0 auto",
+    ...style,
+  };
+
   return (
     <svg
       viewBox="0 0 20 20"
+      width={width}
+      height={height}
       fill="none"
       aria-hidden="true"
       focusable="false"
+      style={iconStyle}
       {...props}
     >
       <path
