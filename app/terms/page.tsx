@@ -35,7 +35,7 @@ export default function TermsPage() {
 
         <h2>Third-party offers</h2>
         <p>
-          Where a page clearly states that a third-party action is required to unlock a resource, that action is provided by an independent third party and may be subject to separate eligibility requirements, terms and privacy practices. GuideVexa will not represent a third-party action as completed until the provider confirms it.
+          Some downloadable resources, including the Complete Travel Pack, may clearly require completion of an available third-party offer before access is unlocked. Those offers are provided by independent third parties and may have separate eligibility requirements, terms and privacy practices. GuideVexa does not control the information requested by an independent offer provider and does not represent an offer as completed until the configured unlock flow returns the visitor to GuideVexa.
         </p>
 
         <h2>Availability and changes</h2>
