@@ -2,9 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { guides } from "@/lib/site";
 
+const description = "Practical guides for travel planning, calculations and everyday digital tasks.";
+
 export const metadata: Metadata = {
   title: "Guides",
-  description: "Practical guides for travel planning, calculations and everyday digital tasks.",
+  description,
+  alternates: { canonical: "/guides" },
+  openGraph: { title: "GuideVexa Guides", description, url: "/guides", type: "website" },
 };
 
 export default function GuidesPage() {
