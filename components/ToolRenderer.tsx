@@ -97,59 +97,31 @@ function TravelBudgetPlanner() {
     budgetTarget,
   ]);
 
-  const downloadPlan = () => {
-    trackToolEvent("travel_pack_download", {
+  const openTravelPack = () => {
+    trackToolEvent("travel_pack_landing_open", {
       currency,
       days,
       travelers: people,
       estimated_total: Math.round(totals.total),
     });
 
-    const packingStarter = [
-      "Passport / ID and travel documents",
-      "Payment card + backup payment method",
-      "Phone charger / power bank",
-      "Medication and basic health items",
-      "Weather-appropriate clothing",
-      "Comfortable walking shoes",
-      "Reusable water bottle",
-    ];
+    const params = new URLSearchParams({
+      destination,
+      currency,
+      days: String(days),
+      people: String(people),
+      rooms: String(rooms),
+      nightly: String(nightly),
+      flightsPerPerson: String(flightsPerPerson),
+      foodPerPerson: String(foodPerPerson),
+      activitiesPerPerson: String(activitiesPerPerson),
+      localTransportPerDay: String(localTransportPerDay),
+      insurancePerPerson: String(insurancePerPerson),
+      misc: String(misc),
+      bufferPct: String(bufferPct),
+    });
 
-    const text = [
-      "GUIDEVEXA — FULL TRAVEL PACK",
-      "================================",
-      `Destination: ${destination || "Not specified"}`,
-      `Trip: ${days} days / ${totals.nights} nights`,
-      `Travelers: ${people}`,
-      `Currency: ${currency}`,
-      "",
-      "BUDGET BREAKDOWN",
-      `Flights: ${formatMoney(totals.flights, currency)}`,
-      `Lodging: ${formatMoney(totals.lodging, currency)}`,
-      `Food: ${formatMoney(totals.food, currency)}`,
-      `Activities: ${formatMoney(totals.activities, currency)}`,
-      `Local transport: ${formatMoney(totals.localTransport, currency)}`,
-      `Travel insurance: ${formatMoney(totals.insurance, currency)}`,
-      `Other / miscellaneous: ${formatMoney(misc, currency)}`,
-      `${bufferPct}% safety buffer: ${formatMoney(totals.buffer, currency)}`,
-      `Estimated total: ${formatMoney(totals.total, currency)}`,
-      `Per traveler: ${formatMoney(totals.perPerson, currency)}`,
-      `Per day: ${formatMoney(totals.perDay, currency)}`,
-      "",
-      "PACKING STARTER",
-      ...packingStarter.map(item => `- [ ] ${item}`),
-      "",
-      "NOTES",
-      "This is a planning estimate, not a quote. Check current prices before booking.",
-      "Generated with GuideVexa Travel Budget Planner.",
-    ].join("\n");
-
-    const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = "guidevexa-full-travel-pack.txt";
-    anchor.click();
-    URL.revokeObjectURL(url);
+    window.location.assign(`/go/travel-pack?${params.toString()}`);
   };
 
   const printPlan = () => {
@@ -274,10 +246,10 @@ function TravelBudgetPlanner() {
         </div>
 
         <div className="budget-actions">
-          <button className="button full-width" data-ogads-slot="travel-pack" onClick={downloadPlan}>Download full travel pack</button>
+          <button className="button full-width" onClick={openTravelPack}>Get complete travel pack</button>
           <button className="button button-ghost full-width" onClick={printPlan}>Print budget</button>
         </div>
-        <p className="helper-text compact-helper">Includes the full breakdown and a practical packing starter.</p>
+        <p className="helper-text compact-helper">See the full breakdown, packing starter and daily planner before downloading.</p>
       </ResultBox>
     </div>
   );
