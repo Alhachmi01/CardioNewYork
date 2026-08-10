@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowIcon } from "@/components/ArrowIcon";
 import { ToolCard } from "@/components/ToolCard";
 import { guides, tools } from "@/lib/site";
 
@@ -9,7 +10,7 @@ export default function HomePage() {
     <>
       <section className="hero shell hero-polished">
         <div className="hero-copy">
-          <p className="hero-kicker">PLANNING · CALCULATORS · GUIDES</p>
+          <p className="hero-kicker">TOOLS · PLANNING · GUIDES</p>
           <h1>Free tools for clearer everyday decisions.</h1>
           <p className="hero-lead">Plan trips, estimate costs, run quick calculations and use practical checklists without signing up or digging through clutter.</p>
           <div className="hero-actions">
@@ -27,8 +28,8 @@ export default function HomePage() {
           {featured.map(tool => (
             <Link href={`/tools/${tool.slug}`} className="preview-row preview-row-polished" key={tool.slug}>
               <span className="preview-icon" aria-hidden="true">{tool.icon}</span>
-              <span><strong>{tool.name}</strong><small>{tool.description}</small></span>
-              <span className="preview-arrow" aria-hidden="true">→</span>
+              <span className="preview-copy"><strong>{tool.name}</strong><small>{tool.description}</small></span>
+              <ArrowIcon className="preview-arrow inline-arrow" />
             </Link>
           ))}
         </div>
@@ -40,7 +41,7 @@ export default function HomePage() {
         <div><strong>Mobile ready</strong><span>Built to stay usable on smaller screens.</span></div>
       </section>
 
-      <section className="section shell">
+      <section className="section shell home-tools-section">
         <div className="section-heading">
           <div><p className="section-kicker">TOOLS</p><h2>Useful from the first click.</h2><p>Focused tools that solve one clear problem at a time.</p></div>
           <Link href="/tools" className="text-link">View all tools →</Link>
@@ -60,7 +61,7 @@ export default function HomePage() {
             <Link key={guide.slug} href={`/guides/${guide.slug}`} className="guide-row guide-row-home">
               <span className="guide-number">{String(index + 1).padStart(2, "0")}</span>
               <span className="guide-row-content"><strong>{guide.title}</strong><small>{guide.description}</small><em>{guide.readTime} · {guide.category}</em></span>
-              <span className="guide-row-arrow" aria-hidden="true">→</span>
+              <ArrowIcon className="guide-row-arrow inline-arrow" />
             </Link>
           ))}
         </div>
