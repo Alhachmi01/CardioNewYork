@@ -96,7 +96,6 @@ export function TravelPackLanding(input: TravelBudgetInput) {
         throw new Error("registration_failed");
       }
     } catch {
-      trackEvent("locker_registration_failed");
       setUnlockError("The unlock service is temporarily unavailable. Please try again in a moment.");
       setIsUnlocking(false);
       return;
