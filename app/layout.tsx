@@ -41,6 +41,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
+      <head>
+        <meta name="p:domain_verify" content="eb99832d6143cd28bfe28ad82ad0d763" />
+      </head>
       <body>
         <Script id="guidevexa-data-layer" strategy="beforeInteractive">
           {"window.dataLayer=window.dataLayer||[];"}
