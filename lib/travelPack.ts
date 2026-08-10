@@ -11,6 +11,12 @@ const sessionMaxAgeMs = 24 * 60 * 60 * 1000;
 type StoredTravelPack = {
   input: TravelBudgetInput;
   savedAt: number;
+  ogAdsSessionId?: string;
+};
+
+export type TravelPackSessionState = {
+  input: TravelBudgetInput;
+  ogAdsSessionId: string | null;
 };
 
 function escapeHtml(value: string) {
@@ -23,18 +29,19 @@ function escapeHtml(value: string) {
   })[character] ?? character);
 }
 
-export function saveTravelPackSession(input: TravelBudgetInput) {
+export function saveTravelPackSession(input: TravelBudgetInput, ogAdsSessionId?: string) {
   if (typeof window === "undefined") return;
 
   const payload: StoredTravelPack = {
     input: normalizeTravelBudgetInput(input),
     savedAt: Date.now(),
+    ogAdsSessionId,
   };
 
   window.sessionStorage.setItem(travelPackSessionKey, JSON.stringify(payload));
 }
 
-export function readTravelPackSession(): TravelBudgetInput | null {
+export function readTravelPackSessionState(): TravelPackSessionState | null {
   if (typeof window === "undefined") return null;
 
   const raw = window.sessionStorage.getItem(travelPackSessionKey);
@@ -49,11 +56,18 @@ export function readTravelPackSession(): TravelBudgetInput | null {
       return null;
     }
 
-    return normalizeTravelBudgetInput(parsed.input);
+    return {
+      input: normalizeTravelBudgetInput(parsed.input),
+      ogAdsSessionId: typeof parsed.ogAdsSessionId === "string" ? parsed.ogAdsSessionId : null,
+    };
   } catch {
     window.sessionStorage.removeItem(travelPackSessionKey);
     return null;
   }
+}
+
+export function readTravelPackSession(): TravelBudgetInput | null {
+  return readTravelPackSessionState()?.input ?? null;
 }
 
 export function downloadTravelPack(input: TravelBudgetInput) {
