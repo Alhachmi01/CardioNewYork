@@ -1,13 +1,20 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { ReactNode } from "react";
+import { trackEvent } from "@/lib/analytics";
+import {
+  buildTravelBudgetQuery,
+  calculateTravelBudget,
+  defaultTravelBudgetInput,
+  formatMoney,
+  type CurrencyCode,
+  type TravelBudgetInput,
+} from "@/lib/travelBudget";
 
 function ResultBox({ children }: { children: ReactNode }) {
   return <div className="result-box">{children}</div>;
 }
-
-type CurrencyCode = "USD" | "EUR" | "GBP" | "MAD" | "CAD" | "AUD";
 
 const currencyOptions: { code: CurrencyCode; label: string }[] = [
   { code: "USD", label: "USD — US Dollar" },
@@ -18,71 +25,25 @@ const currencyOptions: { code: CurrencyCode; label: string }[] = [
   { code: "AUD", label: "AUD — Australian Dollar" },
 ];
 
-function formatMoney(value: number, currency: CurrencyCode) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
+function TravelBudgetPlanner({ initialInput = defaultTravelBudgetInput }: { initialInput?: TravelBudgetInput }) {
+  const [destination, setDestination] = useState(initialInput.destination);
+  const [currency, setCurrency] = useState<CurrencyCode>(initialInput.currency);
+  const [days, setDays] = useState(initialInput.days);
+  const [people, setPeople] = useState(initialInput.people);
+  const [rooms, setRooms] = useState(initialInput.rooms);
+  const [nightly, setNightly] = useState(initialInput.nightly);
+  const [flightsPerPerson, setFlightsPerPerson] = useState(initialInput.flightsPerPerson);
+  const [foodPerPerson, setFoodPerPerson] = useState(initialInput.foodPerPerson);
+  const [activitiesPerPerson, setActivitiesPerPerson] = useState(initialInput.activitiesPerPerson);
+  const [localTransportPerDay, setLocalTransportPerDay] = useState(initialInput.localTransportPerDay);
+  const [insurancePerPerson, setInsurancePerPerson] = useState(initialInput.insurancePerPerson);
+  const [misc, setMisc] = useState(initialInput.misc);
+  const [bufferPct, setBufferPct] = useState(initialInput.bufferPct);
+  const [budgetTarget, setBudgetTarget] = useState(initialInput.budgetTarget);
+
+  const currentInput: TravelBudgetInput = {
+    destination,
     currency,
-    maximumFractionDigits: 0,
-  }).format(Number.isFinite(value) ? value : 0);
-}
-
-function trackToolEvent(name: string, detail: Record<string, string | number>) {
-  if (typeof window === "undefined") return;
-
-  window.dispatchEvent(new CustomEvent("guidevexa:tool-event", { detail: { name, ...detail } }));
-
-  const analyticsWindow = window as Window & {
-    dataLayer?: Array<Record<string, string | number>>;
-  };
-  analyticsWindow.dataLayer?.push({ event: name, ...detail });
-}
-
-function TravelBudgetPlanner() {
-  const [destination, setDestination] = useState("Lisbon");
-  const [currency, setCurrency] = useState<CurrencyCode>("USD");
-  const [days, setDays] = useState(7);
-  const [people, setPeople] = useState(2);
-  const [rooms, setRooms] = useState(1);
-  const [nightly, setNightly] = useState(90);
-  const [flightsPerPerson, setFlightsPerPerson] = useState(350);
-  const [foodPerPerson, setFoodPerPerson] = useState(35);
-  const [activitiesPerPerson, setActivitiesPerPerson] = useState(25);
-  const [localTransportPerDay, setLocalTransportPerDay] = useState(25);
-  const [insurancePerPerson, setInsurancePerPerson] = useState(30);
-  const [misc, setMisc] = useState(80);
-  const [bufferPct, setBufferPct] = useState(10);
-  const [budgetTarget, setBudgetTarget] = useState(2500);
-
-  const totals = useMemo(() => {
-    const safeDays = Math.max(days, 1);
-    const safePeople = Math.max(people, 1);
-    const nights = Math.max(safeDays - 1, 0);
-    const flights = flightsPerPerson * safePeople;
-    const lodging = nightly * nights * Math.max(rooms, 1);
-    const food = foodPerPerson * safeDays * safePeople;
-    const activities = activitiesPerPerson * safeDays * safePeople;
-    const localTransport = localTransportPerDay * safeDays;
-    const insurance = insurancePerPerson * safePeople;
-    const subtotal = flights + lodging + food + activities + localTransport + insurance + misc;
-    const buffer = subtotal * (Math.max(bufferPct, 0) / 100);
-    const total = subtotal + buffer;
-
-    return {
-      nights,
-      flights,
-      lodging,
-      food,
-      activities,
-      localTransport,
-      insurance,
-      subtotal,
-      buffer,
-      total,
-      perPerson: total / safePeople,
-      perDay: total / safeDays,
-      targetDifference: budgetTarget > 0 ? budgetTarget - total : 0,
-    };
-  }, [
     days,
     people,
     rooms,
@@ -95,37 +56,22 @@ function TravelBudgetPlanner() {
     misc,
     bufferPct,
     budgetTarget,
-  ]);
+  };
+  const totals = calculateTravelBudget(currentInput);
 
   const openTravelPack = () => {
-    trackToolEvent("travel_pack_landing_open", {
+    trackEvent("travel_pack_landing_open", {
       currency,
       days,
       travelers: people,
       estimated_total: Math.round(totals.total),
     });
 
-    const params = new URLSearchParams({
-      destination,
-      currency,
-      days: String(days),
-      people: String(people),
-      rooms: String(rooms),
-      nightly: String(nightly),
-      flightsPerPerson: String(flightsPerPerson),
-      foodPerPerson: String(foodPerPerson),
-      activitiesPerPerson: String(activitiesPerPerson),
-      localTransportPerDay: String(localTransportPerDay),
-      insurancePerPerson: String(insurancePerPerson),
-      misc: String(misc),
-      bufferPct: String(bufferPct),
-    });
-
-    window.location.assign(`/go/travel-pack?${params.toString()}`);
+    window.location.assign(`/go/travel-pack?${buildTravelBudgetQuery(currentInput)}`);
   };
 
   const printPlan = () => {
-    trackToolEvent("travel_budget_print", {
+    trackEvent("travel_budget_print", {
       currency,
       estimated_total: Math.round(totals.total),
     });
@@ -328,8 +274,8 @@ function UnitConverter() {
   );
 }
 
-export function ToolRenderer({ slug }: { slug: string }) {
-  if (slug === "travel-budget-planner") return <TravelBudgetPlanner />;
+export function ToolRenderer({ slug, initialTravelBudget }: { slug: string; initialTravelBudget?: TravelBudgetInput }) {
+  if (slug === "travel-budget-planner") return <TravelBudgetPlanner initialInput={initialTravelBudget} />;
   if (slug === "trip-packing-checklist") return <PackingChecklist />;
   if (slug === "percentage-calculator") return <PercentageCalculator />;
   if (slug === "unit-converter") return <UnitConverter />;
