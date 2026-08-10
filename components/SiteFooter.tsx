@@ -1,6 +1,27 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export function SiteFooter() {
+  const pathname = usePathname();
+  const isLandingPage = pathname.startsWith("/go/");
+
+  if (isLandingPage) {
+    return (
+      <footer className="site-footer landing-footer">
+        <div className="shell landing-footer-inner">
+          <span>© {new Date().getFullYear()} GuideVexa.</span>
+          <nav aria-label="Landing page legal links">
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/contact">Contact</Link>
+          </nav>
+        </div>
+      </footer>
+    );
+  }
+
   return (
     <footer className="site-footer">
       <div className="shell footer-grid">
@@ -12,6 +33,7 @@ export function SiteFooter() {
           <Link href="/tools">Tools</Link>
           <Link href="/guides">Guides</Link>
           <Link href="/about">About</Link>
+          <Link href="/contact">Contact</Link>
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
         </div>
