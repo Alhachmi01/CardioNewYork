@@ -1,0 +1,58 @@
+.heroGallery {
+  display: grid;
+  grid-template-columns: 1.28fr .72fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.heroPhoto,
+.heroPhotoSecondary {
+  position: relative;
+  min-height: 176px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #0d111c;
+}
+
+.heroPhotoSecondary {
+  min-height: 176px;
+}
+
+.heroPhoto img,
+.heroPhotoSecondary img {
+  display: block;
+  width: 100%;
+  height: 176px;
+  object-fit: cover;
+  transition: transform .35s ease;
+}
+
+.heroPhoto:hover img,
+.heroPhotoSecondary:hover img {
+  transform: scale(1.025);
+}
+
+.heroPhoto::after,
+.heroPhotoSecondary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(9, 11, 18, .03), rgba(9, 11, 18, .28));
+}
+
+@media (max-width: 590px) {
+  .heroGallery {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .heroPhoto,
+  .heroPhotoSecondary,
+  .heroPhoto img,
+  .heroPhotoSecondary img {
+    min-height: 132px;
+    height: 132px;
+  }
+}

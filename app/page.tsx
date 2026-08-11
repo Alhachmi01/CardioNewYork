@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowIcon } from "@/components/ArrowIcon";
 import { JsonLd } from "@/components/JsonLd";
 import { ToolCard } from "@/components/ToolCard";
 import { guides, siteConfig, tools } from "@/lib/site";
+import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -15,6 +17,9 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
+
+const arubaImage = "https://images.unsplash.com/photo-1759365840055-14a90826996c?auto=format&fit=crop&w=1200&q=80";
+const nycImage = "https://images.unsplash.com/photo-1512621450499-28dfc7415645?auto=format&fit=crop&w=900&q=80";
 
 export default function HomePage() {
   const featured = tools.filter(tool => tool.featured).slice(0, 3);
@@ -45,6 +50,28 @@ export default function HomePage() {
         </div>
 
         <div className="hero-panel hero-panel-polished" aria-label="Popular GuideVexa tools">
+          <div className={styles.heroGallery} aria-label="Travel destination inspiration">
+            <figure className={styles.heroPhoto}>
+              <Image
+                src={arubaImage}
+                alt="Turquoise water and palm trees on a beach in Aruba"
+                width={1200}
+                height={760}
+                sizes="(max-width: 860px) 60vw, 360px"
+                priority
+              />
+            </figure>
+            <figure className={styles.heroPhotoSecondary}>
+              <Image
+                src={nycImage}
+                alt="Lower Manhattan skyline across the water in New York City"
+                width={900}
+                height={760}
+                sizes="(max-width: 860px) 40vw, 220px"
+              />
+            </figure>
+          </div>
+
           <div className="hero-panel-head">
             <div><span className="panel-label">Popular tools</span><strong>Start with what you need now</strong></div>
             <span className="panel-status">Updated</span>
