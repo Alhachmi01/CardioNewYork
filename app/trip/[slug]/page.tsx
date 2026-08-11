@@ -44,8 +44,8 @@ export default async function TripPage({ params, searchParams }: Props) {
   if (!trip) notFound();
 
   const parent = trip.parentTripId ? await getTrip(trip.parentTripId) : null;
-  const comparisonBudget = parent?.budget ?? trip.budget;
-  const originalTotals = calculateTravelBudget(comparisonBudget);
+  const lineageComparisonBudget = parent?.budget ?? trip.budget;
+  const lineageComparisonTotals = calculateTravelBudget(lineageComparisonBudget);
   const justSaved = query.saved === "1";
   const demand = trip.demoAudience;
   const demandRows = demand ? audienceItems(demand) : [];
@@ -75,7 +75,7 @@ export default async function TripPage({ params, searchParams }: Props) {
         </div>
         <div className={styles.originalTotal}>
           <span>{trip.parentTripId ? "Parent version" : "Original budget"}</span>
-          <strong>{formatMoney(originalTotals.total, comparisonBudget.currency)}</strong>
+          <strong>{formatMoney(lineageComparisonTotals.total, lineageComparisonBudget.currency)}</strong>
         </div>
       </div>
 
@@ -100,7 +100,7 @@ export default async function TripPage({ params, searchParams }: Props) {
 
       <TravelBudgetPlanner
         initialBudget={trip.budget}
-        originalBudget={comparisonBudget}
+        originalBudget={trip.budget}
         lockedFields={lockedFields}
         mode="remix"
         parentTripId={trip.id}
