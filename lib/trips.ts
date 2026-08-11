@@ -104,7 +104,7 @@ export const arubaCreatorDemoTrip: TripNode = {
   planningNote:
     "Private planning demo based on representative values inside the source guide's published 2025 daily ranges: lodging $250/night, meals $45/day, activities $100/day and transport $40/day. Flights and insurance are excluded. This is not a claim of the creator's actual spend and not a live quote.",
   source: {
-    label: "Public Aruba planning guide (2025)",
+    label: "Mariah Deola’s public Aruba travel guide (2025)",
     url: "https://www.mariahdeola.com/post/aruba-travel-guide-how-to-plan-the-perfect-trip-budget-tips-recs",
   },
   cover: {
