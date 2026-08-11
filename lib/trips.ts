@@ -75,49 +75,49 @@ export const demoTrip: TripNode = {
   },
 };
 
-export const arubaCreatorDemoTrip: TripNode = {
-  id: "demo-aruba-5-days",
+export const creatorDemoTrip: TripNode = {
+  id: "demo-europe-christmas-markets-10-days",
   parentTripId: null,
-  rootTripId: "demo-aruba-5-days",
-  creatorSlug: "creator-preview",
-  title: "5 Days in Aruba — Planning Remix",
+  rootTripId: "demo-europe-christmas-markets-10-days",
+  creatorSlug: "the-mobile-homie-preview",
+  title: "10-Day European Christmas Markets — Planning Remix",
   budget: {
-    destination: "Aruba",
+    destination: "European Christmas Markets",
     currency: "USD",
-    days: 5,
+    days: 10,
     people: 1,
     rooms: 1,
-    nightly: 250,
-    flightsPerPerson: 0,
-    foodPerPerson: 45,
-    activitiesPerPerson: 100,
-    localTransportPerDay: 40,
+    nightly: 85,
+    flightsPerPerson: 900,
+    foodPerPerson: 65,
+    activitiesPerPerson: 0,
+    localTransportPerDay: 7,
     insurancePerPerson: 0,
-    misc: 20,
+    misc: 400,
     bufferPct: 0,
-    budgetTarget: 2000,
+    budgetTarget: 3250,
   },
   createdAt: 0,
   depth: 0,
   status: "private",
   demoAudience: null,
   planningNote:
-    "Private planning demo based on representative values inside the source guide's published 2025 daily ranges: lodging $250/night, meals $45/day, activities $100/day and transport $40/day. Flights and insurance are excluded. This is not a claim of the creator's actual spend and not a live quote.",
+    "Private GuideVexa planning demo normalized to one USD budget using round representative values anchored to the source's 2026 published ranges. The guide estimates $2,500–$4,000 total per person, $600–$1,200 for flights, €50–€100/night for accommodation, €35–€45/day for market food and drinks plus €15–€25/day for other meals, €200–€400 for intercity transport and €5–€8/day for local transit. This is not a claim of The Mobile Homie's actual spend and not a live quote.",
   source: {
-    label: "Mariah Deola’s public Aruba travel guide (2025)",
-    url: "https://www.mariahdeola.com/post/aruba-travel-guide-how-to-plan-the-perfect-trip-budget-tips-recs",
+    label: "The Mobile Homie’s 2026 European Christmas Markets itinerary",
+    url: "https://themobilehomie.com/10-day-european-christmas-market-itinerary/",
   },
   cover: {
-    url: "https://images.unsplash.com/photo-1759365840055-14a90826996c?auto=format&fit=crop&w=1800&q=82",
-    alt: "Turquoise water, white sand and palm trees on a beach in Aruba",
-    creditLabel: "Photo by Sebastian Schuster on Unsplash",
-    creditUrl: "https://unsplash.com/photos/h1kDlm1YviY",
+    url: "https://images.unsplash.com/photo-1761273075486-168b2e844a95?auto=format&fit=crop&w=1800&q=82",
+    alt: "Christmas market lights and carousel in Vienna, Austria",
+    creditLabel: "Photo by Jeffrey Zhang on Unsplash",
+    creditUrl: "https://unsplash.com/photos/TDCrRmFLG9k",
   },
 };
 
 const staticTrips = new Map<string, TripNode>([
   [demoTrip.id, demoTrip],
-  [arubaCreatorDemoTrip.id, arubaCreatorDemoTrip],
+  [creatorDemoTrip.id, creatorDemoTrip],
 ]);
 
 export function getStaticTrip(id: string) {
