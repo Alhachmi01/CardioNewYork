@@ -35,7 +35,7 @@ export async function incrementTripMetric(id: string, metric: "views" | "remix_s
   return redis.incr(metricKey(metric, id));
 }
 
-export async function createTripFork(parent: TripNode, submittedBudget: TravelBudgetInput): Promise<TripNode> {
+export async function createTripFork(parent: TripNode, submittedBudget: Partial<TravelBudgetInput>): Promise<TripNode> {
   const candidate = normalizeTravelBudgetInput(submittedBudget);
   const id = randomUUID();
 
