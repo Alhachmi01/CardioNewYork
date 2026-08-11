@@ -8,6 +8,11 @@ export type DemoAudienceDemand = {
   itinerary: number | null;
 };
 
+export type TripSource = {
+  label: string;
+  url: string;
+};
+
 export type TripNode = {
   id: string;
   parentTripId: string | null;
@@ -19,6 +24,8 @@ export type TripNode = {
   depth: number;
   status: TripVisibility;
   demoAudience: DemoAudienceDemand | null;
+  planningNote?: string;
+  source?: TripSource | null;
 };
 
 export const demoTrip: TripNode = {
@@ -51,8 +58,48 @@ export const demoTrip: TripNode = {
     accommodation: null,
     itinerary: null,
   },
+  source: null,
 };
 
+export const arubaCreatorDemoTrip: TripNode = {
+  id: "demo-aruba-5-days",
+  parentTripId: null,
+  rootTripId: "demo-aruba-5-days",
+  creatorSlug: "creator-preview",
+  title: "5 Days in Aruba — Planning Remix",
+  budget: {
+    destination: "Aruba",
+    currency: "USD",
+    days: 5,
+    people: 1,
+    rooms: 1,
+    nightly: 250,
+    flightsPerPerson: 0,
+    foodPerPerson: 45,
+    activitiesPerPerson: 100,
+    localTransportPerDay: 40,
+    insurancePerPerson: 0,
+    misc: 20,
+    bufferPct: 0,
+    budgetTarget: 2000,
+  },
+  createdAt: 0,
+  depth: 0,
+  status: "private",
+  demoAudience: null,
+  planningNote:
+    "Private planning demo based on representative values inside the source guide's published 2025 daily ranges: lodging $250/night, meals $45/day, activities $100/day and transport $40/day. Flights and insurance are excluded. This is not a claim of the creator's actual spend and not a live quote.",
+  source: {
+    label: "Public Aruba planning guide (2025)",
+    url: "https://www.mariahdeola.com/post/aruba-travel-guide-how-to-plan-the-perfect-trip-budget-tips-recs",
+  },
+};
+
+const staticTrips = new Map<string, TripNode>([
+  [demoTrip.id, demoTrip],
+  [arubaCreatorDemoTrip.id, arubaCreatorDemoTrip],
+]);
+
 export function getStaticTrip(id: string) {
-  return id === demoTrip.id ? demoTrip : null;
+  return staticTrips.get(id) ?? null;
 }
