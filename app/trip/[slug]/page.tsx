@@ -24,6 +24,18 @@ function audienceItems(demand: DemoAudienceDemand) {
   ];
 }
 
+function one(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function sanitizePreviewName(value: string | string[] | undefined) {
+  const raw = one(value)?.trim();
+  if (!raw) return null;
+
+  const cleaned = raw.replace(/[^\p{L}\p{N} .'-]/gu, "").slice(0, 40).trim();
+  return cleaned || null;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const trip = await getTrip(slug);
@@ -47,6 +59,7 @@ export default async function TripPage({ params, searchParams }: Props) {
   const lineageComparisonBudget = parent?.budget ?? trip.budget;
   const lineageComparisonTotals = calculateTravelBudget(lineageComparisonBudget);
   const justSaved = query.saved === "1";
+  const previewFor = trip.status === "private" ? sanitizePreviewName(query.previewFor) : null;
   const demand = trip.demoAudience;
   const demandRows = demand ? audienceItems(demand) : [];
   const hasVerifiedCounts = demandRows.some(item => typeof item.count === "number");
@@ -67,10 +80,19 @@ export default async function TripPage({ params, searchParams }: Props) {
           <p>
             Start from this exact trip, keep the destination and duration fixed, then change the cost choices to make a cheaper or more comfortable version.
           </p>
+          {previewFor ? (
+            <p className="muted">Private preview prepared for <strong>{previewFor}</strong>.</p>
+          ) : null}
+          {trip.planningNote ? (
+            <p className="muted">{trip.planningNote}</p>
+          ) : null}
           <div className={styles.lineage}>
             <span>Depth {trip.depth}</span>
             <span>Root {trip.rootTripId}</span>
             {trip.parentTripId ? <span>Forked from {trip.parentTripId}</span> : <span>Original trip</span>}
+            {trip.source ? (
+              <a href={trip.source.url} target="_blank" rel="noreferrer">{trip.source.label} ↗</a>
+            ) : null}
           </div>
         </div>
         <div className={styles.originalTotal}>
