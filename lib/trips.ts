@@ -13,6 +13,13 @@ export type TripSource = {
   url: string;
 };
 
+export type TripCover = {
+  url: string;
+  alt: string;
+  creditLabel?: string;
+  creditUrl?: string;
+};
+
 export type TripNode = {
   id: string;
   parentTripId: string | null;
@@ -26,6 +33,7 @@ export type TripNode = {
   demoAudience: DemoAudienceDemand | null;
   planningNote?: string;
   source?: TripSource | null;
+  cover?: TripCover | null;
 };
 
 export const demoTrip: TripNode = {
@@ -59,6 +67,12 @@ export const demoTrip: TripNode = {
     itinerary: null,
   },
   source: null,
+  cover: {
+    url: "https://images.unsplash.com/photo-1512621450499-28dfc7415645?auto=format&fit=crop&w=1800&q=82",
+    alt: "Lower Manhattan skyline across the water in New York City",
+    creditLabel: "Photo by Goh Rhy Yan on Unsplash",
+    creditUrl: "https://unsplash.com/photos/zmF9dinILOk",
+  },
 };
 
 export const arubaCreatorDemoTrip: TripNode = {
@@ -92,6 +106,12 @@ export const arubaCreatorDemoTrip: TripNode = {
   source: {
     label: "Public Aruba planning guide (2025)",
     url: "https://www.mariahdeola.com/post/aruba-travel-guide-how-to-plan-the-perfect-trip-budget-tips-recs",
+  },
+  cover: {
+    url: "https://images.unsplash.com/photo-1759365840055-14a90826996c?auto=format&fit=crop&w=1800&q=82",
+    alt: "Turquoise water, white sand and palm trees on a beach in Aruba",
+    creditLabel: "Photo by Sebastian Schuster on Unsplash",
+    creditUrl: "https://unsplash.com/photos/h1kDlm1YviY",
   },
 };
 
