@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TravelBudgetPlanner } from "@/components/TravelBudgetPlanner";
+import { TripViewTracker } from "@/components/TripViewTracker";
 import { calculateTravelBudget, formatMoney } from "@/lib/travelBudget";
 import { getTrip } from "@/lib/tripStore";
 import type { DemoAudienceDemand } from "@/lib/trips";
@@ -74,6 +75,8 @@ export default async function TripPage({ params, searchParams }: Props) {
 
   return (
     <section className="page shell">
+      <TripViewTracker tripId={trip.id} />
+
       <div className="breadcrumbs">
         <Link href="/">Home</Link><span>/</span><span>Trips</span><span>/</span><span>{trip.budget.destination}</span>
       </div>
