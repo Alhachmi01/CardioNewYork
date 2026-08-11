@@ -62,6 +62,8 @@ export async function createTripFork(parent: TripNode, submittedBudget: Partial<
     depth: parent.depth + 1,
     status: "unlisted",
     demoAudience: null,
+    planningNote: parent.planningNote,
+    source: parent.source ?? null,
   };
 
   const redis = getRedisClient();
