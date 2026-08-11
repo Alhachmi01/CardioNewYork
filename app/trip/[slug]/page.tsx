@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TravelBudgetPlanner } from "@/components/TravelBudgetPlanner";
@@ -47,6 +48,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     robots: trip.status === "public"
       ? { index: true, follow: true }
       : { index: false, follow: false, noarchive: true },
+    openGraph: trip.cover
+      ? {
+          title: `${trip.title} — Remix this trip`,
+          description: `Fork this ${trip.budget.days}-day ${trip.budget.destination} trip and compare your budget with the original.`,
+          images: [{ url: trip.cover.url, alt: trip.cover.alt }],
+        }
+      : undefined,
   };
 }
 
@@ -69,6 +77,25 @@ export default async function TripPage({ params, searchParams }: Props) {
       <div className="breadcrumbs">
         <Link href="/">Home</Link><span>/</span><span>Trips</span><span>/</span><span>{trip.budget.destination}</span>
       </div>
+
+      {trip.cover ? (
+        <figure className={styles.cover}>
+          <Image
+            src={trip.cover.url}
+            alt={trip.cover.alt}
+            width={1800}
+            height={1000}
+            sizes="(max-width: 760px) 100vw, 1120px"
+            priority={trip.depth === 0}
+            className={styles.coverImage}
+          />
+          {trip.cover.creditLabel && trip.cover.creditUrl ? (
+            <a className={styles.coverCredit} href={trip.cover.creditUrl} target="_blank" rel="noreferrer">
+              {trip.cover.creditLabel}
+            </a>
+          ) : null}
+        </figure>
+      ) : null}
 
       {justSaved ? (
         <p className={styles.saved}>Saved. This is your new immutable fork — you can remix it again without changing its parent.</p>
