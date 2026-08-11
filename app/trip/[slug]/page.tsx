@@ -117,9 +117,6 @@ export default async function TripPage({ params, searchParams }: Props) {
             <span>Depth {trip.depth}</span>
             <span>Root {trip.rootTripId}</span>
             {trip.parentTripId ? <span>Forked from {trip.parentTripId}</span> : <span>Original trip</span>}
-            {trip.source ? (
-              <a href={trip.source.url} target="_blank" rel="noreferrer">{trip.source.label} ↗</a>
-            ) : null}
           </div>
         </div>
         <div className={styles.originalTotal}>
@@ -127,6 +124,19 @@ export default async function TripPage({ params, searchParams }: Props) {
           <strong>{formatMoney(lineageComparisonTotals.total, lineageComparisonBudget.currency)}</strong>
         </div>
       </div>
+
+      {trip.source ? (
+        <aside className={styles.sourceCard} aria-label="Source and attribution">
+          <div className={styles.sourceCopy}>
+            <span>Source & attribution</span>
+            <strong>Based on {trip.source.label}</strong>
+            <small>GuideVexa created this independent interactive planning version. No partnership or endorsement is implied.</small>
+          </div>
+          <a className={styles.sourceLink} href={trip.source.url} target="_blank" rel="noreferrer">
+            View original guide ↗
+          </a>
+        </aside>
+      ) : null}
 
       {demand ? (
         <div className={styles.demand}>
